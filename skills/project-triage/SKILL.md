@@ -225,7 +225,7 @@ Say in the summary "Sniff test: proportionate", or how many signs and the main o
 
 #### Security review
 
-Review every PR's changes for security problems: injection (SQL, shell, template), cross-site scripting and missing output escaping, missing access checks, CSRF on state-changing routes, unsafe deserialization or file handling, secrets in code or config, and dependency changes with known advisories (the host's reference, "Security"). Use the agent's security review command or skill if it has one, run in the review checkout (see "Review checkout"), otherwise review the diff yourself. Verify each finding as "Verify before commenting" says.
+Review every PR's changes for security problems: injection (SQL, shell, template), cross-site scripting and missing output escaping, missing access checks, CSRF on state-changing routes, unsafe deserialization or file handling, secrets in code or config, CI steps the PR adds or changes that install dependencies without a lock file (`npm install` instead of `npm ci`, unpinned `pip install`), and dependency changes with known advisories (the host's reference, "Security"). Use the agent's security review command or skill if it has one, run in the review checkout (see "Review checkout"), otherwise review the diff yourself. Verify each finding as "Verify before commenting" says.
 
 - A problem the PR **introduces** in unreleased code is an ordinary review finding: comment on the PR, as `**issue (blocking):**`.
 - A problem in code that's **already released** (the PR touches it, or reveals it) is a vulnerability: follow the Security rule in "Rules", and don't describe it in the PR.
