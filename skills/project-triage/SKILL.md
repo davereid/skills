@@ -47,6 +47,8 @@ With `--mine`, it lists the user's own open PRs instead, with what each is waiti
   - `gitlab.com`, or a hostname containing `gitlab`: `references/gitlab.md`.
   - Any other host: ask whether it's GitHub Enterprise or GitLab.
 
+  Whatever the host, if the codebase is a Drupal site or extension (its `composer.json` requires `drupal/core` or `drupal/core-recommended`, or it has an `*.info.yml` file at its root or under `modules/` or `web/modules/`), also load `references/drupal.md` for reviews.
+
   If the repo has `.claude/project-triage-issues.md` with a "Fetching issues" section (see "Project issue tracker"), use it instead of the host reference for every issue step.
 
   Use the reference's commands for every step, mapping the skill's terms (review, requested reviewers, draft) as the reference says. If a command fails, report the error; don't treat it as an unsupported host.
@@ -76,6 +78,8 @@ For each PR, find the user's latest review (by submission time, author = `$ME`; 
   4. no rule matches but the profile's description of the user's skill set fits the PR from its title and file list. Label it "judgment call" and give the reason in a few words.
 - **Hidden**: everything else. Count them, and list them only with `--all-prs`.
 
+In an owned repo, also fetch the workflow runs waiting for approval, once for the repo (the host's reference, "Pending workflow runs"), and keep those on an open PR's head commit; runs on older commits are stale. A PR the user reviewed that has any is **A**, even when its head is the reviewed commit.
+
 Rule matching (apply it literally and say which rule matched):
 - `paths`: any changed file matches a glob (`**` crosses directories, `*` doesn't).
 - `labels`: any label matches one listed, exactly or as a glob where `*` matches any characters (`v7.x-*` matches `v7.x-1.x-dev` and `v7.x-1.9`). `keywords`: any word in the title is a form of a keyword, case-insensitive: plurals, verb forms and related nouns count (`migrate` matches "migrates", "migrated", "migrating", "migration" and "migrations"), but not unrelated words that share letters (`test` doesn't match "latest"). Say which title word matched.
@@ -94,14 +98,14 @@ Drop issues whose author or labels match the profile's `exclude` (`paths` and `b
 
 Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B issues. Sort each by most recently updated first.
 
-- PRs: number, title, author, last updated ("3 days ago", from step 2), why it's listed, size (files, +/-). For A, include the user's last review state and date. For a PR authored by a bot or labeled `dependencies` that requests the user, also read its CI results and add "CI failing" to the why column when a check fails.
+- PRs: number, title, author, last updated ("3 days ago", from step 2), why it's listed, size (files, +/-). For A, include the user's last review state and date. For a PR authored by a bot or labeled `dependencies` that requests the user, also read its CI results and add "CI failing" to the why column when a check fails. Add "N runs awaiting approval" to the why column of any PR with runs waiting on its head (step 3).
 - Issues: number, title, author, last updated, why it's listed, assignees, number of comments. For A, include the date of the user's last comment.
 
 Under them: "N PRs not matching your profile" (and how many were excluded), "N issues waiting on others" (and how many were excluded), and which profile files were loaded. If the user gave a number, skip the tables.
 
 Then ask which items to handle now (multi-select, with "none"). Handle them strictly one at a time:
 
-- Show one item's summary, review and drafts per message, never several items' together. If the agent can run tasks in the background, start the reviews of the other selected PRs (e.g. `/code-review <n>`) in the background once the user picks them, and keep each result until its item comes up; otherwise run each review when its item comes up.
+- Show one item's summary, review and drafts per message, never several items' together. If the agent can run tasks in the background, start the reviews of the other selected PRs (the code reviews from step 8's **Review it now**) in the background once the user picks them, and keep each result until its item comes up; otherwise run each review when its item comes up.
 - At each question about an item, the user can give feedback or ask for more investigation instead of picking an option (offer **Investigate further** alongside the step's options). Do what they ask, show the updated findings or draft, and ask again. Move on only when they've acted on the item or chosen **Skip**.
 - Between items, say which one is next and how many are left (e.g. "Next: #42, 2 of 3"), and let the user stop there.
 
@@ -131,7 +135,7 @@ Ask, with options by the user's last review (every case also offers **Show full 
 - Changes requested: **Approve** (changes addressed), **Keep requesting changes**, **Comment**, **Skip**.
 - Commented: **Approve**, **Request changes**, **Comment**, **Skip**.
 
-Before drafting text, apply "Verify before commenting" (in step 8) to each earlier point you're about to call addressed or still open, and to any new finding. Then fetch the PR's reviews and comments again: the user or others may have posted since the summary, e.g. after a `/code-review` hand-off. If the user already posted a review, summarize it and ask what's left instead of drafting a duplicate. Show the exact text and resulting state, get the user's go-ahead, then run. Every review body follows [Conventional Comments](https://conventionalcomments.org): `**<label> (<decorations>):** <subject>`, label in bold. Labels: `praise`, `nitpick`, `suggestion`, `issue`, `todo`, `question`, `thought`, `chore`, `note`. Decorations: `blocking`, `non-blocking`, `if-minor`. One paragraph per point, separated by blank lines: GitHub and GitLab join consecutive lines into one paragraph.
+Before drafting text, apply "Verify before commenting" (in step 8) to each earlier point you're about to call addressed or still open, and to any new finding. Then fetch the PR's reviews and comments again: the user or others may have posted since the summary, e.g. after a code review hand-off. If the user already posted a review, summarize it and ask what's left instead of drafting a duplicate. Show the exact text and resulting state, get the user's go-ahead, then run. Every review body follows [Conventional Comments](https://conventionalcomments.org): `**<label> (<decorations>):** <subject>`, label in bold. Labels: `praise`, `nitpick`, `suggestion`, `issue`, `todo`, `question`, `thought`, `chore`, `note`. Decorations: `blocking`, `non-blocking`, `if-minor`. One paragraph per point, separated by blank lines: GitHub and GitLab join consecutive lines into one paragraph.
 
 In every review (A or B PRs), post a point that asks for a change to specific code as an inline comment on that line or range of the diff, with the same label and decorations, submitted together with the review (the host's reference, "Actions"). Inline threads show as outdated when the author changes those lines, and can be resolved one by one, so the next review can see what's left. This includes tests to add when the diff has related tests to anchor them to. Keep general points in the review body, such as the overall approach or the title and description. Inline comments can only go on lines the diff shows: a point about other code goes in the body, naming its file and line. Show each inline comment with its file and line in the draft.
 
@@ -142,7 +146,7 @@ In every review (A or B PRs), post a point that asks for a change to specific co
 
 ### 8. B PR: summarize and hand off
 
-Read the PR description, file list and commits. Say in a few lines what it does, why it's listed, how big it is, whether it has tests (see "Test coverage"), whether its title follows the project's format (see "PR title"), which issue it closes (see "Linked issue"), missing context links (see "Context and links"), whether it discloses AI use (see "AI-assisted PRs"), whether it follows the conventions (see "Conventions"), what the security review found (see "Security review"), simpler or existing code it could use (see "Simpler or existing code"), the sniff test (see "Sniff test"), whether it targets the default branch (see "Target branch and backports"), CI state, and who else has reviewed. Then ask: **Review it now** (run `/code-review <n>` and the security review, and come back to approve, request changes or comment from that), **Comment**, **Skip**. If the PR is bot-authored or labeled `dependencies`, has failing checks, and the `pr-fix` skill is available (listed as `pr-fix`, or `pr-skills:pr-fix` when installed as a plugin) and supports this host (see its `SKILL.md`), also offer **Fix it** (run it with `<n>`). That skill asks before every commit, push and comment, and only works on PRs opened by a bot or by the user, from a branch in the same repository, so it refuses the PR if it's anyone else's. Never run it unless the user chooses it. Comments follow Conventional Comments, with the text shown first.
+Read the PR description, file list and commits. Say in a few lines what it does, why it's listed, how big it is, whether it has tests (see "Test coverage"), whether its title follows the project's format (see "PR title"), which issue it closes (see "Linked issue"), missing context links (see "Context and links"), whether it discloses AI use (see "AI-assisted PRs"), whether it follows the conventions (see "Conventions"), what the security review found (see "Security review"), simpler or existing code it could use (see "Simpler or existing code"), the sniff test (see "Sniff test"), whether it targets the default branch (see "Target branch and backports"), CI state, and who else has reviewed. Then ask: **Review it now** (run the agent's code review on the PR, e.g. Claude Code's `/code-review <n>`, plus any other code review skill the agent has, such as ponytail's `ponytail-review`, and the security review, then come back to approve, request changes or comment from their combined findings), **Comment**, **Skip**. If the PR is bot-authored or labeled `dependencies`, has failing checks, and the `pr-fix` skill is available (listed as `pr-fix`, or `pr-skills:pr-fix` when installed as a plugin) and supports this host (see its `SKILL.md`), also offer **Fix it** (run it with `<n>`). That skill asks before every commit, push and comment, and only works on PRs opened by a bot or by the user, from a branch in the same repository, so it refuses the PR if it's anyone else's. Never run it unless the user chooses it. Comments follow Conventional Comments, with the text shown first.
 
 #### Test coverage
 
@@ -195,7 +199,14 @@ Say in the summary that the PR discloses AI use and that it was reviewed this wa
 
 #### Simpler or existing code
 
-In every review, look for code that reimplements something the project, its framework or a dependency already provides (a helper, a service, a base class, a library function), abstractions or options nobody asked for, and code that could be shorter. For a workaround or a copy of upstream code, check whether a newer upstream release already has the fix or API (see "Check upstream" in step 9). Name the existing API or release in the suggestion, as `**suggestion (non-blocking):**`, and say what you checked (e.g. the helper's signature at the PR's base).
+In every review, look for code that reimplements something the project, its framework or a dependency already provides (a helper, a service, a base class, a library function), abstractions or options nobody asked for, and code that could be shorter.
+
+- **Search, don't recall:** for each new helper, service, hook or pattern, search the framework's and dependencies' source as installed in the user's checkout (e.g. `vendor/`, or `web/core` and `web/modules/contrib` in a Drupal site or a module set up with ddev-drupal-contrib) for code doing the same job, and cite the file and line you found. The review checkout usually has no installed dependencies, so search the user's checkout, and say so when it isn't installed.
+- **Static analysis first:** read the framework-aware linters' results in the PR's CI (e.g. phpstan with the framework's extension and deprecation rules), or run them in the review checkout. They catch deprecated APIs and many anti-patterns without judgment calls.
+- **Framework reference:** in a Drupal codebase, also check `references/drupal.md` (see step 1).
+- **Report-only review skills:** if the agent has a review skill that reports code that should be deleted, reused or merged without editing files (e.g. ponytail's `ponytail-review`), use its findings here, verified as "Verify before commenting" says. Never run a skill that edits files (e.g. Claude Code's `/simplify`) on someone else's PR, except in the review checkout with its edits discarded.
+
+For a workaround or a copy of upstream code, check whether a newer upstream release already has the fix or API (see "Check upstream" in step 9). Name the existing API or release in the suggestion, as `**suggestion (non-blocking):**`, and say what you checked (e.g. the helper's signature at the PR's base).
 
 #### Sniff test
 
@@ -256,7 +267,7 @@ After a bug fix merges into the default branch (when the user asked for the merg
 
 #### Verify before commenting
 
-Review findings (from `/code-review` or your own reading) are often wrong or unconfirmed, and the user wants to post with certainty. Before drafting, sort each finding into:
+Review findings (from the code reviews or your own reading) are often wrong or unconfirmed, and the user wants to post with certainty. Before drafting, sort each finding into:
 
 - **Cheap to verify:** a claim you can settle in a minute without changing the repo, such as reading the file at the PR's head, reading the framework's or a dependency's code, a `grep` for usages, comparing config with what the code would calculate in memory, or running a small read-only script or an existing test against the project's tooling. Offer to run these (one option per group of checks, plus "skip"), and run them before drafting. Use a scratch directory outside the repository, and delete the scripts afterwards.
 - **Not cheap:** needs a browser, a deploy, or a long test run. Don't run it unasked. Draft it as a question to the author, not as a statement.
@@ -321,6 +332,8 @@ Fetch the user's own open PRs, including drafts. For each, count its unresolved 
 - **Draft**.
 
 Ask which PRs to handle now (multi-select, with "none"). For each: list the open feedback (reviewer, link, one line each, marking comments from outside the repo's collaborators or from bots), the failed checks, and the remaining tasks, saying for each task whether it looks needed to finish the PR and whether it's a code change. If the branch is out of date without conflicts, offer **Update branch**, with the reference's "Update branch" command, after saying what it does: whether it merges the base in or rebases (which rewrites the PR's commits like a force-push, so follow the user's instructions on force-pushing, and say whose commits it rewrites). Once it's done, check that the head changed and report the new checks. If there's feedback, a failing check, a remaining code task or a conflicting branch, and the `pr-fix` skill is available and supports this host, offer **Fix it** (run it with `<n>`; say which of these it will fix, and for a conflicting branch that it merges the base in, or rebases only if the user's instructions allow force-pushing), **Show the threads** in full, and **Skip**. Never run `pr-fix` unless the user chooses it. Without `pr-fix`, summarize and skip.
+
+For every selected PR, also offer **Review and simplify**: check out its branch in the user's working copy (after checking it has no uncommitted changes), run the agent's code review and any other review skills it has (as **Review it now** in step 8 does), plus a cleanup skill that applies its fixes if the agent has one (e.g. Claude Code's `/simplify`), and check the result against "Simpler or existing code" and "Conventions" in step 8. Show the findings and the changes made, then commit or push only when the user asks.
 
 ### Your own issues (`--mine --issues`)
 

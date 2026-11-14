@@ -149,6 +149,8 @@ The `gh` token only needs read access to triage. Write access is needed only for
 
 `gh run list -R <repo> --branch <headRefName> --json databaseId,workflowName,event,conclusion,headSha` and keep runs with `conclusion` `action_required` (for a fork PR, `--branch` is the fork's branch name, so also match `headSha` to the PR's head). Approve one: `gh api -X POST repos/<repo>/actions/runs/<id>/approve`. Runs of the same workflow that a newer run superseded show as `cancelled`; only the newest counts.
 
+For the whole repo at once (step 3): `gh run list -R <repo> --status action_required --limit 100 --json databaseId,workflowName,headSha`, keeping runs whose `headSha` is an open PR's `headRefOid`. Runs on a PR's older commits stay `action_required` after a new push, so don't count them.
+
 ## Reading CI results
 
 Use `gh pr checks <n> -R <repo>`. If it fails with "Resource not accessible by personal access token", the token is fine-grained and has no Checks: read. Fall back to:
