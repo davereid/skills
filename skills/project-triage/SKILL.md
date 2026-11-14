@@ -242,7 +242,7 @@ Reading and static checks are fine. Running anything from the PR (tests, build s
 
 Check every reviewed PR's code against two sources, and report what doesn't follow them, citing the rule and where it's written:
 
-1. **The project's conventions:** its instruction files and docs (`AGENTS.md`, `CLAUDE.md`, contributing docs), linter and coding-standard config, and how its existing code does the same thing.
+1. **The project's conventions:** its instruction files and docs (`AGENTS.md`, `CLAUDE.md`, contributing docs), the docs they link to about coding or reviews (e.g. a `docs/review.md` checklist; follow those links, one level deep), linter and coding-standard config, and how its existing code does the same thing. A project checklist adds to the framework's (e.g. `references/drupal.md`), and wins where they differ.
 2. **The user's global instruction files.** Rules only these files have are the user's preferences: word them as such (see "Convention claims" below).
 
 How they combine depends on ownership:
