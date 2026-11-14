@@ -22,9 +22,10 @@ The standard, as the constants below encode it:
 - `.github/CODEOWNERS` on the default branch, naming the logged-in user
   (GitHub reads it before a root file, which a GitLab mirror can keep).
 - Required checks only in rulesets named `ci` or `ci-<branch>`, with no bypass
-  list, so a bypassed review still needs passing jobs: from GitHub Actions, up
-  to date, and including "Conventional Commits" on every checked branch. No
-  classic branch protection.
+  list, so a bypassed review still needs passing jobs: from GitHub Actions,
+  without requiring branches to be up to date (auto-merge never updates a
+  branch, and personal accounts have no merge queue), and including
+  "Conventional Commits" on every checked branch. No classic branch protection.
 - Every checked branch has `.github/workflows/pr-title.yml` with a job named
   "Conventional Commits" and no filters on `pull_request`.
 """
@@ -111,8 +112,8 @@ def audit(repo):
         for rule in rs["rules"]:
             if rule["type"] == "required_status_checks":
                 p = rule["parameters"]
-                if not p.get("strict_required_status_checks_policy"):
-                    out.append(f"ruleset {rs['name']}: branches don't have to be up to date")
+                if p.get("strict_required_status_checks_policy"):
+                    out.append(f"ruleset {rs['name']}: branches must be up to date, so auto-merge waits for manual updates")
                 for c in p["required_status_checks"]:
                     if c.get("integration_id") != ACTIONS_APP:
                         out.append(f"ruleset {rs['name']}: check {c['context']!r} isn't limited to GitHub Actions")
