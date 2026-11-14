@@ -10,16 +10,17 @@ The standard, as the constants below encode it:
 - Squash merges only, titled and described from the PR; branches deleted after
   merge; Wiki and Projects off.
 - Actions pinned to full commit SHAs; a read-only default token that can open
-  and approve PRs; approval required for first-time contributors (public
-  repositories only).
+  and approve PRs; approval required only for first-time contributors who
+  are new to GitHub (public repositories only), which is safe while workflows
+  run fork PRs without secrets or write access.
 - A ruleset named `main` on the default branch and every `<N>.x` branch:
   no deletion or force pushes, a squash-merged PR for every change (code
   owner approval and resolved threads required; stale approvals aren't
   dismissed and the last push needs no separate approval; only repository
   admins may bypass, and only when merging a PR, so a sole code owner can
   merge their own PRs), and no required checks.
-- `.github/CODEOWNERS` on the default branch, naming the logged-in user (a
-  per-host directory, so a GitLab mirror can keep its own `.gitlab/CODEOWNERS`).
+- `.github/CODEOWNERS` on the default branch, naming the logged-in user
+  (GitHub reads it before a root file, which a GitLab mirror can keep).
 - Required checks only in rulesets named `ci` or `ci-<branch>`, with no bypass
   list, so a bypassed review still needs passing jobs: from GitHub Actions, up
   to date, and including "Conventional Commits" on every checked branch. No
@@ -45,7 +46,7 @@ REPO_SETTINGS = {
 }
 ACTIONS = {"enabled": True, "sha_pinning_required": True}
 WORKFLOW = {"default_workflow_permissions": "read", "can_approve_pull_request_reviews": True}
-FORK_APPROVAL = "first_time_contributors"
+FORK_APPROVAL = "first_time_contributors_new_to_github"
 TITLE_CHECK = "Conventional Commits"
 # Repository admins (role 5) may bypass, but only when merging a PR, never by pushing.
 ADMIN_BYPASS = {"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request"}

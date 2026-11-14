@@ -10,8 +10,7 @@ deviation is printed with the settings page to change it in.
 
 The standard:
 - Unresolved threads block merging ("All threads must be resolved"; SETTINGS).
-- A `.gitlab/CODEOWNERS` (not at the root) on the default branch that names
-  the user.
+- A `CODEOWNERS` at the root of the default branch that names the user.
 - When the user is the only maintainer (drupal.org's `root-admin` aside): the
   default branch is protected, and every protected branch requires code owner
   approval. With other maintainers, that's for the user to decide, so it's
@@ -69,13 +68,9 @@ def check(p, me):
             yield f"{key} is {p.get(key)}, want {want}: {url}/merge_requests"
 
     branch = p["default_branch"]
-    # A root CODEOWNERS would win over .gitlab/, leaving no room for a GitHub mirror's own file.
-    ref = quote(branch, safe="")
-    owners = glab(f"projects/{pid}/repository/files/.gitlab%2FCODEOWNERS/raw?ref={ref}", missing_ok=True, raw=True)
-    if glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={ref}", missing_ok=True, raw=True) is not None:
-        yield f"CODEOWNERS at the root of {branch}: move it to .gitlab/CODEOWNERS"
+    owners = glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(branch, safe='')}", missing_ok=True, raw=True)
     if owners is None:
-        yield f"no .gitlab/CODEOWNERS on {branch}"
+        yield f"no CODEOWNERS at the root of {branch}"
     elif f"@{me}" not in owners.split():
         yield f"CODEOWNERS on {branch} doesn't name @{me}"
 
