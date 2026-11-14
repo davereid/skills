@@ -1,6 +1,6 @@
 {
     "name": "davereid/skills",
-    "description": "Claude Code skills for pull requests: fix failing PRs in DDEV projects (with a Taskfile and CI workflow) and triage the PRs and issues that need your review or a reply.",
+    "description": "Claude Code skills for pull requests: fix failing PRs in DDEV projects (with a Taskfile and CI workflow), triage the PRs and issues that need your review or a reply, and move local backlog notes into PRs and issues.",
     "type": "library",
     "license": "MIT",
     "require": {},
@@ -10,6 +10,8 @@
                 "[project-root]/.claude/skills/pr-fix/SKILL.md": "skills/pr-fix/SKILL.md",
                 "[project-root]/.claude/skills/pr-fix/SETUP.md": "skills/pr-fix/SETUP.md",
                 "[project-root]/.claude/skills/pr-fix/README.md": "skills/pr-fix/README.md",
+                "[project-root]/.claude/skills/project-backlog/SKILL.md": "skills/project-backlog/SKILL.md",
+                "[project-root]/.claude/skills/project-backlog/README.md": "skills/project-backlog/README.md",
                 "[project-root]/.claude/skills/project-triage/SKILL.md": "skills/project-triage/SKILL.md",
                 "[project-root]/.claude/skills/project-triage/README.md": "skills/project-triage/README.md",
                 "[project-root]/.claude/skills/project-triage/profile.example.md": "skills/project-triage/profile.example.md",
