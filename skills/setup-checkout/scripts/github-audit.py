@@ -13,11 +13,17 @@ The standard, as the constants below encode it:
   and approve PRs; approval required for first-time contributors (public
   repositories only).
 - A ruleset named `main` on the default branch and every `<N>.x` branch:
-  no deletion or force pushes, a squash-merged PR for every change (0
-  approvals, no bypass list), and the "Conventional Commits" check from
-  GitHub Actions, with branches required to be up to date.
-- Other required checks only in rulesets named `ci` or `ci-<branch>`, also from
-  GitHub Actions and up to date. No classic branch protection.
+  no deletion or force pushes, a squash-merged PR for every change (code
+  owner approval and resolved threads required; stale approvals aren't
+  dismissed and the last push needs no separate approval; only repository
+  admins may bypass, and only when merging a PR, so a sole code owner can
+  merge their own PRs), and no required checks.
+- `.github/CODEOWNERS` on the default branch, naming the logged-in user (a
+  per-host directory, so a GitLab mirror can keep its own `.gitlab/CODEOWNERS`).
+- Required checks only in rulesets named `ci` or `ci-<branch>`, with no bypass
+  list, so a bypassed review still needs passing jobs: from GitHub Actions, up
+  to date, and including "Conventional Commits" on every checked branch. No
+  classic branch protection.
 - Every checked branch has `.github/workflows/pr-title.yml` with a job named
   "Conventional Commits" and no filters on `pull_request`.
 """
@@ -41,13 +47,15 @@ ACTIONS = {"enabled": True, "sha_pinning_required": True}
 WORKFLOW = {"default_workflow_permissions": "read", "can_approve_pull_request_reviews": True}
 FORK_APPROVAL = "first_time_contributors"
 TITLE_CHECK = "Conventional Commits"
+# Repository admins (role 5) may bypass, but only when merging a PR, never by pushing.
+ADMIN_BYPASS = {"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request"}
 ACTIONS_APP = 15368
 PR_PARAMS = {
-    "required_approving_review_count": 0,
+    "required_approving_review_count": 1,
     "dismiss_stale_reviews_on_push": False,
-    "require_code_owner_review": False,
+    "require_code_owner_review": True,
     "require_last_push_approval": False,
-    "required_review_thread_resolution": False,
+    "required_review_thread_resolution": True,
     "allowed_merge_methods": ["squash"],
 }
 MAJOR_BRANCH = re.compile(r"^\d+\.x$")
@@ -94,8 +102,11 @@ def audit(repo):
         rulesets[rs["name"]] = rs
         if rs["enforcement"] != "active":
             out.append(f"ruleset {rs['name']}: enforcement is {rs['enforcement']}")
-        if rs.get("bypass_actors"):
-            out.append(f"ruleset {rs['name']}: has a bypass list")
+        # Only `main` may let admins skip review (merging through a PR), so a sole code owner can merge their own PRs.
+        allowed = [ADMIN_BYPASS] if rs["name"] == "main" else []
+        bypass = [{k: a.get(k) for k in ADMIN_BYPASS} for a in rs.get("bypass_actors") or []]
+        if bypass != allowed:
+            out.append(f"ruleset {rs['name']}: bypass list is {bypass}, expected {allowed}")
         for rule in rs["rules"]:
             if rule["type"] == "required_status_checks":
                 p = rule["parameters"]
@@ -114,18 +125,23 @@ def audit(repo):
         if sorted(include) != sorted(want_include):
             out.append(f"ruleset main: applies to {include}, expected {want_include}")
         types = {r["type"]: r for r in main["rules"]}
-        for t in ("deletion", "non_fast_forward", "pull_request", "required_status_checks"):
+        for t in ("deletion", "non_fast_forward", "pull_request"):
             if t not in types:
                 out.append(f"ruleset main: missing rule {t}")
         if "pull_request" in types:
             compare("ruleset main pull_request ", types["pull_request"]["parameters"], PR_PARAMS, out)
         if "required_status_checks" in types:
-            checks = [c["context"] for c in types["required_status_checks"]["parameters"]["required_status_checks"]]
-            if checks != [TITLE_CHECK]:
-                out.append(f"ruleset main: requires {checks}, expected [{TITLE_CHECK!r}]")
+            out.append("ruleset main: has required checks, which its bypass skips; move them to a ci ruleset")
         extra = set(types) - {"deletion", "non_fast_forward", "pull_request", "required_status_checks"}
         if extra:
             out.append(f"ruleset main: extra rules {sorted(extra)}")
+    # Code owner review needs a CODEOWNERS file; GitHub reads `.github/` first.
+    me = gh("user")["login"]
+    owners = gh(f"repos/{repo}/contents/.github/CODEOWNERS?ref={default}")
+    if not owners:
+        out.append(f"CODEOWNERS: no .github/CODEOWNERS on {default}")
+    elif f"@{me}".lower() not in base64.b64decode(owners["content"]).decode().lower():
+        out.append(f"CODEOWNERS: doesn't name @{me}")
     for name in rulesets:
         if name != "main" and not (name == "ci" or name.startswith("ci-")):
             out.append(f"ruleset {name}: not a standard name (main, ci, ci-<branch>)")
@@ -135,8 +151,8 @@ def audit(repo):
         rules = gh(f"repos/{repo}/rules/branches/{b}") or []
         required = {c["context"] for r in rules if r["type"] == "required_status_checks"
                     for c in r["parameters"]["required_status_checks"]}
-        if not required:
-            out.append(f"{b}: no required checks")
+        if TITLE_CHECK not in required:
+            out.append(f"{b}: {TITLE_CHECK!r} isn't a required check")
         wf = gh(f"repos/{repo}/contents/.github/workflows/pr-title.yml?ref={b}")
         if not wf:
             out.append(f"{b}: no .github/workflows/pr-title.yml")
