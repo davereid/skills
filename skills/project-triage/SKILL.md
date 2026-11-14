@@ -101,6 +101,8 @@ Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B
 - PRs: number, title, author, last updated ("3 days ago", from step 2), why it's listed, size (files, +/-). For A, include the user's last review state and date. For a PR authored by a bot or labeled `dependencies` that requests the user, also read its CI results and add "CI failing" to the why column when a check fails. Add "N runs awaiting approval" to the why column of any PR with runs waiting on its head (step 3).
 - Issues: number, title, author, last updated, why it's listed, assignees, number of comments. For A, include the date of the user's last comment.
 
+In an owned repo, also add a **Fixes to backport** table (see "Merged fixes on older branches" in step 8): the PR number (or the commit's short SHA for a direct commit), title, date, and the supported branches that still lack it.
+
 Under them: "N PRs not matching your profile" (and how many were excluded), "N issues waiting on others" (and how many were excluded), and which profile files were loaded. If the user gave a number, skip the tables.
 
 Then ask which items to handle now (multi-select, with "none"). Handle them strictly one at a time:
@@ -265,6 +267,12 @@ Changes land on the default branch first, then go to older supported branches. W
 
 After a bug fix merges into the default branch (when the user asked for the merge), in an owned repo, offer **Cherry-pick to older branches**: list the other supported branches (the reference's "Supported branches", minus any the profile's `exclude.branches` matches), check the fix applies to each, then cherry-pick it there keeping the original author, with a `(cherry picked from commit <sha>)` line and the branch's commit message convention. Ask before each push. Features don't get cherry-picked unless the user asks.
 
+#### Merged fixes on older branches
+
+Fixes also land outside this skill: merged in the host's UI, by other maintainers, as the user's own PRs, or committed straight to the default branch. In an owned repo, with more than one supported branch, check each run (and with `--mine`) the commits on the default branch from the last 30 days, or since the oldest supported branch's latest release if that's longer ago. Start from the commits (`git log` of the fetched default branch, first parent only), not from merged PRs, so direct commits are included; for a commit from a PR, use the PR's title, labels and linked issue too. A bug fix is a commit or PR titled `fix:` (or the project's equivalent, e.g. "Fix …", or "Bug report" on the linked issue) or a PR labeled as a bug.
+
+For each one, and each other supported branch, check whether the branch already has it: a commit whose message has `cherry picked from commit <sha>`, the same issue number, or the same title; or the commit's diff applies in reverse there (`git apply --check -R`, in a scratch worktree outside the repository). If the code it fixes doesn't exist on that branch, say it doesn't apply there. List the rest in the **Fixes to backport** table. When the user picks one, offer **Cherry-pick to older branches** as above, showing for each branch whether the diff applies cleanly. Never cherry-pick or push without the user's answer for that branch.
+
 #### Verify before commenting
 
 Review findings (from the code reviews or your own reading) are often wrong or unconfirmed, and the user wants to post with certainty. Before drafting, sort each finding into:
@@ -320,7 +328,7 @@ After each action, report the result and the item's URL. At the end, list what w
 
 ### Your own PRs (`--mine`)
 
-Fetch the user's own open PRs, including drafts. For each, count its unresolved review threads and read its CI state. Show one table, most recently updated first: number, title, last updated, size, and what it's waiting on, all that apply:
+In owned repos, also show the **Fixes to backport** table after it (see "Merged fixes on older branches" in step 8). Fetch the user's own open PRs, including drafts. For each, count its unresolved review threads and read its CI state. Show one table, most recently updated first: number, title, last updated, size, and what it's waiting on, all that apply:
 
 - **Changes requested** by whom (the overall review decision, and the reviewers whose latest review requests changes).
 - **N unresolved threads**.
