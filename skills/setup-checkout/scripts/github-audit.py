@@ -21,7 +21,8 @@ The standard, as the constants below encode it:
   merge their own PRs), and no required checks.
 - `.github/CODEOWNERS` on the default branch, naming the logged-in user
   (GitHub reads it before a root file, which a GitLab mirror can keep).
-- With a `renovate.json` on the default branch: Dependabot alerts on (Renovate
+- With a `renovate.json` on the default branch: it extends `:semanticCommits`
+  (Conventional Commit titles); Dependabot alerts on (Renovate
   reads them) and Dependabot security updates off (they'd duplicate Renovate's).
 - Required checks only in rulesets named `ci` or `ci-<branch>`, with no bypass
   list, so a bypassed review still needs passing jobs: from GitHub Actions,
@@ -96,7 +97,12 @@ def audit(repo):
         out.append(f"fork PR approval is {fork.get('approval_policy')!r}, expected {FORK_APPROVAL!r}")
 
     # Renovate opens security PRs from Dependabot alerts; Dependabot's own security PRs would duplicate them.
-    if gh(f"repos/{repo}/contents/renovate.json?ref={default}"):
+    renovate = gh(f"repos/{repo}/contents/renovate.json?ref={default}")
+    if renovate:
+        config = json.loads(base64.b64decode(renovate["content"]))
+        # Without it, Renovate's titles fail the required "Conventional Commits" check.
+        if ":semanticCommits" not in config.get("extends", []) and config.get("semanticCommits") != "enabled":
+            out.append("renovate.json doesn't extend ':semanticCommits', so its PR titles fail the Conventional Commits check")
         if gh(f"repos/{repo}/vulnerability-alerts") is None:
             out.append("Dependabot alerts are off, so Renovate can't open security updates")
         if (gh(f"repos/{repo}/automated-security-fixes") or {}).get("enabled"):
