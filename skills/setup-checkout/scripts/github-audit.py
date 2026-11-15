@@ -21,6 +21,8 @@ The standard, as the constants below encode it:
   merge their own PRs), and no required checks.
 - `.github/CODEOWNERS` on the default branch, naming the logged-in user
   (GitHub reads it before a root file, which a GitLab mirror can keep).
+- With a `renovate.json` on the default branch: Dependabot alerts on (Renovate
+  reads them) and Dependabot security updates off (they'd duplicate Renovate's).
 - Required checks only in rulesets named `ci` or `ci-<branch>`, with no bypass
   list, so a bypassed review still needs passing jobs: from GitHub Actions,
   without requiring branches to be up to date (auto-merge never updates a
@@ -71,7 +73,8 @@ def gh(path):
         if "404" in r.stdout + r.stderr or "Upgrade to GitHub Pro" in r.stderr:
             return None
         sys.exit(f"gh api {path} failed: {r.stderr.strip()}")
-    return json.loads(r.stdout)
+    # Some endpoints answer 204 with no body, e.g. vulnerability-alerts when enabled.
+    return json.loads(r.stdout) if r.stdout.strip() else {}
 
 
 def compare(prefix, actual, expected, out):
@@ -91,6 +94,13 @@ def audit(repo):
     fork = {} if info["private"] else gh(f"repos/{repo}/actions/permissions/fork-pr-contributor-approval") or {}
     if not info["private"] and fork.get("approval_policy") != FORK_APPROVAL:
         out.append(f"fork PR approval is {fork.get('approval_policy')!r}, expected {FORK_APPROVAL!r}")
+
+    # Renovate opens security PRs from Dependabot alerts; Dependabot's own security PRs would duplicate them.
+    if gh(f"repos/{repo}/contents/renovate.json?ref={default}"):
+        if gh(f"repos/{repo}/vulnerability-alerts") is None:
+            out.append("Dependabot alerts are off, so Renovate can't open security updates")
+        if (gh(f"repos/{repo}/automated-security-fixes") or {}).get("enabled"):
+            out.append(f"Dependabot security updates are on alongside Renovate: gh api -X DELETE repos/{repo}/automated-security-fixes")
 
     branches = [b["name"] for b in gh(f"repos/{repo}/branches?per_page=100")]
     majors = [b for b in branches if MAJOR_BRANCH.match(b)]
