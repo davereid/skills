@@ -28,6 +28,7 @@ Look for code that does by hand what core provides:
 - `$container->has() ? $container->get() : NULL` instead of `ContainerInterface::NULL_ON_INVALID_REFERENCE`.
 - Update hooks that load or save entities, or call services that invoke hooks; `hook_deploy_NAME()` in a contributed module (it only runs through Drush).
 - Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows.
+- Tests that use `expectExceptionMessage()`, which PHPUnit 13 deprecates, instead of `expectExceptionObject()`; its replacement, `expectExceptionMessageIsOrContains()`, doesn't exist before PHPUnit 13.
 - A contrib dependency that's only in `composer.json`, or a version constraint in `.info.yml`: drupal.org builds Composer requirements from `.info.yml`, and CI builds the test site from `composer.json` (`require-dev`).
 - A new setting that changes existing sites' behavior, turned on in code rather than only in `config/install`.
 - Constraint violations reported on the field list rather than the property they're about (`atPath()`).
