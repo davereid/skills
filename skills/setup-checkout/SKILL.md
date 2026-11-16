@@ -1,6 +1,6 @@
 ---
 name: setup-checkout
-description: Clone or update a drupal.org project checkout: DDEV, tests and CI.
+description: "Clone or update a drupal.org project checkout: DDEV, tests and CI."
 ---
 
 # Set up a checkout
