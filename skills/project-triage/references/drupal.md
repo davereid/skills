@@ -34,3 +34,10 @@ Look for code that does by hand what core provides:
 - Constraint violations reported on the field list rather than the property they're about (`atPath()`).
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
+
+## Site tooling
+
+When a PR touches CI workflows, the Taskfile or DDEV config, also check:
+
+- Taskfile includes from `vendor/` (e.g. Drainpipe's) without `optional: true`: `task` then fails to load before `composer install`, and in builds without dev dependencies.
+- CI that installs Composer or JS dependencies inside DDEV without caching the downloads: point `COMPOSER_CACHE_DIR` and `YARN_CACHE_FOLDER` (or `npm_config_cache`) at absolute paths under `/var/www/html` in `.ddev/config.local.yaml`, cache those directories keyed on the lock file, and gitignore them. Caching Docker images isn't worth it: restoring them is slower than pulling them (ddev/github-action-setup-ddev#15).
