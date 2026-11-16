@@ -29,6 +29,8 @@ drupal.org issues have a status, which says whose turn it is. Show it in the iss
 
 In an owned project, _Needs review_ and _RTBC_ issues are listed as B even if the user has commented, when there's no comment from the user since the status changed: they're waiting on the maintainer. _Needs work_ and _Postponed_ issues whose latest comment is the user's stay hidden.
 
+Sort every table by status first: _RTBC_, then _Needs review_, then the rest, most recently updated first within each. An MR takes its issue's status, so an MR whose issue is _RTBC_ comes first among the PRs too. Show the status in each row.
+
 ## Migrated issues
 
 Issues migrated from drupal.org's issue queue to work items are authored by `drupalbot` on GitLab. Find who really opened them, and when, before classifying:

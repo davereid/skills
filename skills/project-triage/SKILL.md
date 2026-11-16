@@ -96,7 +96,7 @@ Drop issues whose author or labels match the profile's `exclude` (`paths` and `b
 
 ### 5. Show the triage list
 
-Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B issues. Sort each by most recently updated first.
+Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B issues. Sort each by most recently updated first, unless the host's reference gives another order.
 
 - PRs: number, title, author, last updated ("3 days ago", from step 2), why it's listed, size (files, +/-). For A, include the user's last review state and date. For a PR authored by a bot or labeled `dependencies` that requests the user, also read its CI results and add "CI failing" to the why column when a check fails. Add "N runs awaiting approval" to the why column of any PR with runs waiting on its head (step 3).
 - Issues: number, title, author, last updated, why it's listed, assignees, number of comments. For A, include the date of the user's last comment.
