@@ -90,6 +90,8 @@ Searching needs no login or extra tools: the `curl` commands below read public p
 
 drupal.org MRs come from issue forks, but the work item is in `project/<name>`, so `Closes #<nid>` works; the full form `Closes https://git.drupalcode.org/project/<name>/-/work_items/<nid>` is clearer. Take `<nid>` from the source branch (`<nid>-<slug>`). When a merge doesn't close the work item (no closing reference, or merged into a non-default branch such as `8.x-1.x`), close it as in "Actions" ("Fixed by a merge").
 
+Project Update Bot issues (reported by `project update bot`, e.g. "Automated Drupal 12 compatibility fixes for <name>") stay open after a merge, and so does the bot's own MR: the bot keeps posting new fixes to them as its rules change. Don't set `state::fixed` or close them, and don't flag an MR for lacking a closing reference to one. Refer to it with "Related to" instead of `Closes`, which would close it on a merge into the default branch (2026-11-18, embed #3606280).
+
 ## Actions
 
 ### Merge requests
@@ -98,7 +100,7 @@ As in `gitlab.md`, plus:
 
 - Rebase: when an MR the user approves, retargets or wants to merge has `detailed_merge_status` `need_rebase` and `has_conflicts` false, offer **Rebase** with `gitlab.md`'s command. It rewrites the issue fork's branch (like a force-push), so ask first. Issue forks only accept pushes from accounts that requested push access on that issue, whatever "Allow commits from members" says: a `403 Cannot push to source branch` means the user hasn't. Offer `drupalorg issue:get-access <name>#<nid>` (it posts a public `/do:access` comment, so show it and ask first), or the issue page's **Get push access** button, then retry. The rebase may reset approvals: check them before saying the MR is ready to merge.
 - Retitle: `glab mr update <iid> -R <repo> --title "<title>"`, shown first.
-- Merge (only when the user asks): first have the user review and finalize the contribution record (see "Contribution records") and copy its "Git commit message". Merge with that message: `glab mr merge <iid> -R <repo> --squash --squash-message "<message>"` (or `--message` without squashing). Check `gitlab.md`'s "Merge" first: in a fast-forward-only project, an MR behind its target needs **Rebase** (above), which rewrites the issue fork's branch. If the user can't edit the record, say so and leave the merge to a maintainer.
+- Merge (only when the user asks): first have the user review and finalize the contribution record (see "Contribution records") and copy its "Git commit message". Its first line comes from the issue's title, so replace it with the MR's title when that's the better summary (e.g. a Conventional Commit title), keeping the `By:` credit lines after a blank line. Merge with that message: `glab mr merge <iid> -R <repo> --squash --squash-message "<message>"` (or `--message` without squashing). Check `gitlab.md`'s "Merge" first: in a fast-forward-only project, an MR behind its target needs **Rebase** (above), which rewrites the issue fork's branch. If the user can't edit the record, say so and leave the merge to a maintainer.
 
 ### Work items
 
