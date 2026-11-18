@@ -12,6 +12,10 @@ The standard:
 - Unresolved threads block merging ("All threads must be resolved"; SETTINGS).
 - Merge trains are off (SETTINGS): a contrib project rarely has merges queued
   at once, and a train reruns the whole pipeline before each merge.
+- Each protected branch (the default and the release branches) has an active
+  pipeline schedule, so it's tested weekly even without commits, between late
+  Sunday and early Monday, before the work week. A missing one is printed with
+  a suggested time in that window, spread by project and branch (`cron()`).
 - A `CODEOWNERS` at the root of the default branch that names the user.
 - When the user is the only maintainer (drupal.org's `root-admin` aside): the
   default branch is protected, and every protected branch requires code owner
@@ -21,6 +25,7 @@ The standard:
 import json
 import subprocess
 import sys
+import zlib
 from urllib.parse import quote
 
 HOST = "git.drupalcode.org"
@@ -31,6 +36,21 @@ SETTINGS = {
 
 
 SYSTEM_ACCOUNTS = {"root-admin"}
+# Weekly schedules run between Sunday 22:00 and Monday 06:00.
+SCHEDULE_START = (0, 22)  # (cron weekday, hour)
+SCHEDULE_MINUTES = 8 * 60
+SCHEDULE_DAYS = {"0", "1", "7"}
+
+
+def cron(name, branch):
+    """Return a weekly cron time in the window, stable for each project and branch.
+
+    Spreading schedules out keeps them from all hitting drupal.org's runners at
+    once, and a hash rather than random gives the same answer on every audit.
+    """
+    offset = SCHEDULE_START[1] * 60 + zlib.crc32(f"{name}:{branch}".encode()) % SCHEDULE_MINUTES
+    day = (SCHEDULE_START[0] + offset // (24 * 60)) % 7
+    return f"{offset % 60} {offset // 60 % 24} * * {day}"
 
 
 def glab(path, paginate=False, missing_ok=False, raw=False):
@@ -73,6 +93,19 @@ def check(p, me):
             yield f"{key} is {p.get(key)}, want {want}: {url}/merge_requests"
 
     branch = p["default_branch"]
+    protected = {b["name"]: b for b in glab(f"projects/{pid}/protected_branches")}
+    schedules_url = f"https://{HOST}/project/{name}/-/pipeline_schedules"
+    scheduled = {}
+    for page in glab(f"projects/{pid}/pipeline_schedules?per_page=100", paginate=True):
+        for s in page:
+            if s["active"]:
+                scheduled[s["ref"].removeprefix("refs/heads/")] = s["cron"]
+    for b in sorted({branch} | {n for n in protected if "*" not in n}):
+        if b not in scheduled:
+            yield f"{b} has no active pipeline schedule, suggest '{cron(name, b)}': {schedules_url}"
+        elif scheduled[b].split()[4] not in SCHEDULE_DAYS:
+            yield f"{b}'s schedule '{scheduled[b]}' isn't late Sunday or early Monday, suggest '{cron(name, b)}': {schedules_url}"
+
     owners = glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(branch, safe='')}", missing_ok=True, raw=True)
     if owners is None:
         yield f"no CODEOWNERS at the root of {branch}"
@@ -85,7 +118,6 @@ def check(p, me):
     if others:
         yield f"note: other maintainers ({', '.join(others)}), so code owner approval is your call"
         return
-    protected = {b["name"]: b for b in glab(f"projects/{pid}/protected_branches")}
     if branch not in protected:
         yield f"default branch {branch} isn't protected: {url}/repository"
     for b in protected.values():
