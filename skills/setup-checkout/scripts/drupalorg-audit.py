@@ -10,6 +10,8 @@ deviation is printed with the settings page to change it in.
 
 The standard:
 - Unresolved threads block merging ("All threads must be resolved"; SETTINGS).
+- Merge trains are off (SETTINGS): a contrib project rarely has merges queued
+  at once, and a train reruns the whole pipeline before each merge.
 - A `CODEOWNERS` at the root of the default branch that names the user.
 - When the user is the only maintainer (drupal.org's `root-admin` aside): the
   default branch is protected, and every protected branch requires code owner
@@ -22,7 +24,10 @@ import sys
 from urllib.parse import quote
 
 HOST = "git.drupalcode.org"
-SETTINGS = {"only_allow_merge_if_all_discussions_are_resolved": True}
+SETTINGS = {
+    "only_allow_merge_if_all_discussions_are_resolved": True,
+    "merge_trains_enabled": False,
+}
 
 
 SYSTEM_ACCOUNTS = {"root-admin"}
