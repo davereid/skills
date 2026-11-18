@@ -96,6 +96,15 @@ Project Update Bot issues (reported by `project update bot`, e.g. "Automated Dru
 
 ## Actions
 
+### Issue status and metadata
+
+After each action, update the issue to match, and show the change alongside the action:
+
+- Status: opening an MR or pushing a fix → _Needs review_; a review that asks for changes, or a pipeline failing on the MR's own changes → _Needs work_; a new MR replacing a reviewed one → _Needs review_, even if the issue was _RTBC_; blocked on another issue → _Postponed_, with a comment linking it; merged → _Fixed_.
+- Metadata: the version matches the MR's target branch (e.g. `8.x-1.x-dev`); the category (bug report, feature request, task) matches the change; the component fits the code it touches; the priority fits the impact; the title describes the problem; tags are added or removed as the work changes. Use drupal.org's [special tags](https://www.drupal.org/docs/develop/issues/fields-and-other-parts-of-an-issue/issue-tags-special-tags) where one fits, spelled exactly as that page lists them, such as "Needs tests", "Needs change record", "Needs release note", "Needs issue summary update", "Needs title update", "Needs manual testing", "Needs screenshots", "Needs reroll", "Needs upstream bugfix", "Regression", "API addition", "API change", "JavaScript", "Accessibility" and "Novice", rather than inventing one. The core committer review tags (such as "Needs framework manager review") are for core only.
+- Read the current values first, and don't lower _RTBC_ or change a priority someone else set without saying why.
+- Work items carry these as labels: `state::…`, `category::…`, `priority::…`, unscoped version labels (`v8.x-1.x-dev`), and component and tag labels. Set them as in "Work items" below. Issue-queue projects can't be updated with `drupalorg`: list each change as a step for the user, with the issue's full URL.
+
 ### Merge requests
 
 As in `gitlab.md`, plus:
