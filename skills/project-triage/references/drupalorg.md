@@ -24,7 +24,7 @@ Check the project's `issues_enabled` (`glab api --hostname git.drupalcode.org "p
 
 drupal.org issues have a status, which says whose turn it is. Show it in the issue tables, and use it on top of the comment-based A/B rules:
 
-- Work items carry it as a scoped label (`state::needsReview`, `state::rtbc`, `state::needsWork`, `state::postponed`, `state::toBePorted`, …; no `state::` label means _Active_). Category and priority are `category::…` and `priority::…` labels.
+- Work items carry it as a scoped label (`state::needsReview`, `state::rtbc`, `state::needsWork`, `state::postponed`, `state::toBePorted`, …; _Active_ is `state::accepted`, e.g. on issues migrated as _Active_). Category and priority are `category::…` and `priority::…` labels.
 - Issue-queue projects: `field_issue_status` numbers. Open ones: 1 _Active_, 8 _Needs review_, 13 _Needs work_, 14 _RTBC_, 4 _Postponed_, 16 _Postponed (maintainer needs more info)_, 15 _Patch (to be ported)_.
 
 In an owned project, _Needs review_ and _RTBC_ issues are listed as B even if the user has commented, when there's no comment from the user since the status changed: they're waiting on the maintainer. _Needs work_ and _Postponed_ issues whose latest comment is the user's stay hidden.
@@ -90,7 +90,7 @@ Searching needs no login or extra tools: the `curl` commands below read public p
 
 drupal.org MRs come from issue forks, but the work item is in `project/<name>`, so `Closes #<nid>` works; the full form `Closes https://git.drupalcode.org/project/<name>/-/work_items/<nid>` is clearer. Take `<nid>` from the source branch (`<nid>-<slug>`). When a merge doesn't close the work item (no closing reference, or merged into a non-default branch such as `8.x-1.x`), close it as in "Actions" ("Fixed by a merge").
 
-Project Update Bot issues (reported by `project update bot`, e.g. "Automated Drupal 12 compatibility fixes for <name>") stay open after a merge, and so does the bot's own MR: the bot keeps posting new fixes to them as its rules change. Don't set `state::fixed` or close them, and don't flag an MR for lacking a closing reference to one. Refer to it with "Related to" instead of `Closes`, which would close it on a merge into the default branch (2026-11-18, embed #3606280).
+Project Update Bot issues (reported by `project update bot`, e.g. "Automated Drupal 12 compatibility fixes for <name>") stay open after a merge, and so does the bot's own MR: the bot keeps posting new fixes to them as its rules change. Don't set `state::fixed` or close them, and don't flag an MR for lacking a closing reference to one. Refer to it with "Related to" instead of `Closes`, which would close it on a merge into the default branch (2026-11-18, embed #3606280). After a merge that covers the bot's fixes, read the issue and its MRs again: when nothing is left to review, offer to move it from _Needs review_ to _Active_ (`state::accepted`) with a comment linking the merged MR, so it waits for the bot's next fixes. If a merge already closed one, offer to reopen it (`glab issue reopen`) as well.
 
 ## Actions
 
