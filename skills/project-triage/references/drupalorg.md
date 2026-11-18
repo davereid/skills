@@ -60,6 +60,7 @@ In an owned project's MR summary, list who is credited, and alert the user to an
 ## Issue-queue projects (`issues_enabled` false)
 
 - List: `drupalorg project:issues <name> all --limit 100 --format=json 2>/dev/null` (`nid`, `title`, `field_issue_status`). It doesn't return authors, assignees or comments.
+- The list can return fewer issues than are open (2026-11-18: 50 for entity_embed, without the open _Needs review_ #3531672). Also read the issue of each open MR whose nid isn't in the list, and say the list may be incomplete.
 - Owned projects only: keep the open statuses, then read each with `drupalorg issue:show <nid> --with-comments --format=llm` to classify it. That's one call per issue: say how many, and ask first if it's more than about 20.
 - Projects the user doesn't own, such as Drupal core: their issue queues are too big to read. Only triage MRs the user commented on (from `gitlab.md`'s events search), and say issues aren't covered there.
 - `drupalorg` can't comment or change statuses: draft the comment and the new status, and give the user the issue link to post it themselves.

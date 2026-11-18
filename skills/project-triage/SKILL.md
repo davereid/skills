@@ -103,6 +103,8 @@ Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B
 
 In an owned repo, also add a **Fixes to backport** table (see "Merged fixes on older branches" in step 8): the PR number (or the commit's short SHA for a direct commit), title, date, and the supported branches that still lack it.
 
+In an owned repo, read the default branch's latest pipeline once. If it fails, say so above the tables, and treat PR failures that match it as the base branch's, not the PR's.
+
 Under them: "N PRs not matching your profile" (and how many were excluded), "N issues waiting on others" (and how many were excluded), and which profile files were loaded. If the user gave a number, skip the tables.
 
 Then ask which items to handle now (multi-select, with "none"). Handle them strictly one at a time:
@@ -314,7 +316,7 @@ When an issue, or a PR finding or workaround, points at code outside this projec
 
 1. **Find the upstream and its tracker:** the package that owns the code path (from a stack trace, a dependency directory such as `vendor/<package>` or `node_modules/<package>`, or the class's namespace), then its tracker: from the repo's "Project issue tracker" file ("Upstream trackers") if it lists the package, otherwise from the package's `composer.json` or `package.json` (`support.issues`, `bugs`, `homepage`, `repository`). Packages from drupal.org (Drupal core and `drupal/*`) use `references/drupalorg.md` (and `references/gitlab.md`, which it builds on), whatever this repo's host is; `drupalorg.md` says how to name them.
 2. **Search it** with the "Upstream trackers" commands for that package if the file gives any, otherwise with the commands in the reference for that tracker's host, which may differ from this repo's host: `references/github.md`, `references/gitlab.md` or `references/drupalorg.md` ("Searching upstream"). For the repo's own tracker, use the file's "Searching" section if it has one. For other trackers (Jira, Bugzilla, a forum), search the tracker's site if you can fetch web pages; otherwise give the user a search link with the keywords, and say you couldn't search it. Try a few short keyword sets (the error message, the class or function, the behavior), open and closed issues, and read the likely matches.
-3. **Report** each candidate with its link, status, and how well it matches: **same cause** (its description or patch covers the code path you traced), **related**, or **not it**. Say what you searched for, and if nothing matched.
+3. **Report** each candidate with its link, status, and how well it matches: **same cause** (its description or patch covers the code path you traced), **related**, or **not it**. Say what you searched for, and if nothing matched. When the upstream fix is merged, check whether it's released: compare its commit with the latest release tag. A merged but unreleased fix still breaks sites and CI, so say so and suggest a release, or requiring the dev branch for now.
 
 Then offer, as separate choices with the exact text shown first:
 
