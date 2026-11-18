@@ -20,7 +20,7 @@ Two kinds of issue:
 
 Which items are looked at depends on whether the user owns the repo:
 
-- **Owned** (the user owns or maintains it; each host's reference says exactly what counts): every open PR and issue from others.
+- **Owned** (the user owns or maintains it; each host's reference says exactly what counts): every open PR and issue from others. A maintainer usually wants to see all of them, so the profile's `match` rules and skill set don't narrow this list; only `exclude` rules do.
 - **Not owned:** PRs that request the user's review, that they reviewed, or that match their profile, and issues assigned to them.
 
 With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues").
