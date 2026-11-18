@@ -1,12 +1,14 @@
 {
     "name": "davereid/skills",
-    "description": "Claude Code skills for pull requests: fix failing PRs in DDEV projects (with a Taskfile and CI workflow), triage the PRs and issues that need your review or a reply, and move local backlog notes into PRs and issues.",
+    "description": "Claude Code skills for pull requests: fix failing PRs in DDEV projects (with a Taskfile and CI workflow), triage the PRs and issues that need your review or a reply, move local backlog notes into PRs and issues, and capture what a session taught.",
     "type": "library",
     "license": "MIT",
     "require": {},
     "extra": {
         "drupal-scaffold": {
             "file-mapping": {
+                "[project-root]/.claude/skills/capture-session/SKILL.md": "skills/capture-session/SKILL.md",
+                "[project-root]/.claude/skills/capture-session/README.md": "skills/capture-session/README.md",
                 "[project-root]/.claude/skills/pr-fix/SKILL.md": "skills/pr-fix/SKILL.md",
                 "[project-root]/.claude/skills/pr-fix/SETUP.md": "skills/pr-fix/SETUP.md",
                 "[project-root]/.claude/skills/pr-fix/README.md": "skills/pr-fix/README.md",
