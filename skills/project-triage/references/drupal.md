@@ -36,6 +36,12 @@ Look for code that does by hand what core provides:
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
 
+## Dependency updates
+
+When a site's PR updates a package in `composer.lock`, also check:
+
+- The package's constraint in `composer.json` still allows older versions (e.g. `^1.0` after updating to 1.8.0), or the package isn't in `require` at all because it comes in through another package. A later `composer update` can then downgrade it, which breaks the site when the PR also dropped patches the older version needs. Ask for the constraint to be raised to the new version (`^1.8`), adding the package to `require` if needed.
+
 ## Site tooling
 
 When a PR touches CI workflows, the Taskfile or DDEV config, also check:
