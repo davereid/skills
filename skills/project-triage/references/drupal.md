@@ -36,6 +36,10 @@ Look for code that does by hand what core provides:
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
 
+## Security
+
+For "Security review", if the `drupal-security-review` skill is installed, check the changed code against the vulnerability classes in its `references/review-methodology.md` ("Deep multi-agent sweep", items 1–6), and grade each finding as its "Complete the sink's source set" section says: trace every caller of a changed sink, such as a shared Twig template with `|raw`, and rate it by the least-privileged role that can supply the value. Use only those checks: the skill's sweep, exploit recordings and report are for full-site audits, not PR reviews.
+
 ## Dependency updates
 
 When a site's PR updates a package in `composer.lock`, also check:
