@@ -121,6 +121,15 @@ The default branch (`default_branch` in `projects/:id`), plus release branches w
 - Private reporting: the project's `SECURITY.md`. Without one, a confidential issue (only project members can see it) is GitLab's usual channel: tell the user to create it with **This issue is confidential** checked, or `glab issue create -R <repo> --confidential`, after showing the text.
 - If the reference for a GitLab-based host gives its own process (as `drupalorg.md` does), use that instead.
 
+### Private security issues
+
+Owned projects only. Security reports are usually confidential issues, which the normal issue fetch already returns to project members, with `confidential: true`. Not every confidential issue is a security report, so use the title, labels (e.g. `security`) and description to tell.
+
+- In step 5, show confidential security issues in a **Private security issues** table first, above the others, and leave them out of the issue tables. Same columns as issues.
+- Coordinated disclosure: never quote them or describe the vulnerability in public issues, MRs or commit messages. Before acting on a public issue or MR that touches the same code, say whether it could disclose the report.
+- Fixes: an MR in the public project is visible to everyone, even when it links a confidential issue. Use GitLab's confidential merge request (from the issue's **Create confidential merge request**, which targets a private fork), or a branch in a private fork. Ask the user which.
+- Comments on confidential issues stay confidential; comment as in "Actions".
+
 ## GitLab token permissions
 
 - Read-only triage: a personal access token with `read_api` (plus `read_user`).

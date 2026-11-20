@@ -104,6 +104,8 @@ Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B
 
 In an owned repo, also add a **Fixes to backport** table (see "Merged fixes on older branches" in step 8): the PR number (or the commit's short SHA for a direct commit), title, date, and the supported branches that still lack it.
 
+In an owned repo, if the host's reference has a "Private security issues" section, fetch them as it says and show them in their own table above the others. Keep their details out of every public draft.
+
 In an owned repo, read the default branch's latest pipeline once. If it fails, say so above the tables, and treat PR failures that match it as the base branch's, not the PR's.
 
 Under them: "N PRs not matching your profile" (and how many were excluded), "N issues waiting on others" (and how many were excluded), and which profile files were loaded. If the user gave a number, skip the tables.

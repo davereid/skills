@@ -126,6 +126,17 @@ As in `gitlab.md`, plus:
 - Published advisories: `https://www.drupal.org/security` (core and contrib).
 - Private reports go to the Drupal Security Team: `https://www.drupal.org/drupal-security-team/security-team-procedures` explains how. Its process covers projects with security advisory coverage; for projects without it, say what the project page says about coverage and let the user decide.
 
+### Private security issues
+
+Owned projects only. Each report is a private project, `security/<nid>-<name>-security`: the security team's private fork of the project, whose one issue, `issues/1`, holds the discussion. Only the project's maintainers and the security team can see them, and maintainers get Developer access, so they can push branches and open MRs there.
+
+- List: `glab api --hostname git.drupalcode.org "groups/security/projects?search=<name>-security&simple=true&per_page=100"`, and keep only paths matching `security/<digits>-<name>-security` exactly: the search matches substrings, so `embed` also returns `url_embed` and `entity_embed`. An empty list means no reports, or no access: say that it can't tell which.
+- For each, read `projects/security%2F<nid>-<name>-security/issues/1` and keep the open ones. Read its `/notes` (skip `system` notes) to classify it as in step 4: `security-team-bot`'s "no activity" reminders and comments addressed to the maintainers count as waiting on the user. Its `Security status::…` label (e.g. `postponed`) is its status.
+- In step 5, show a **Private security issues** table first, above the others: link, title, status, last updated, who commented last, and whether it waits on the user. Flag "no activity" reminders: the team marks a project unsupported when they go unanswered. Say how many closed ones were skipped.
+- Coordinated disclosure: never quote these issues or describe the vulnerability in drafts for public issues, MRs, commit messages or public issue forks. Before acting on a public issue or MR that touches the same code, say whether it could disclose the report (e.g. a public fix for it), and suggest raising it in the private issue first. Don't commit a fix to the project until the security team says so.
+- Fix branches go to the private project (e.g. a `security` remote, `git@git.drupal.org:security/<nid>-<name>-security.git`), never to `origin` or a public issue fork. The private project's branches can lag the public ones: base fix branches on the public branch, and check the MR's commit list before opening it.
+- Comment: `glab issue note 1 -R https://git.drupalcode.org/security/<nid>-<name>-security -m "<text>"`, shown first, as for any comment.
+
 ## AI disclosure
 
 drupal.org's [AI policy](https://www.drupal.org/docs/develop/issues/issue-procedures-and-etiquette/policy-on-the-use-of-ai-when-contributing-to-drupal) requires disclosing significant AI-generated text or code in issues and MRs. When a draft comment is more than a short reply, remind the user before posting that they should rewrite it in their own words, or add a disclosure naming the tool and what it produced.

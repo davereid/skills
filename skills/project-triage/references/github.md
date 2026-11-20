@@ -132,6 +132,16 @@ The default branch (`gh repo view <repo> --json defaultBranchRef`), plus release
 - Private reporting: the repo's `SECURITY.md` (root, `.github/` or `docs/`). If the repo has private vulnerability reporting turned on (`gh api repos/<repo>/private-vulnerability-reporting -q .enabled`), it's at `https://github.com/<repo>/security/advisories/new`.
 - Published advisories for a package: `gh api "advisories?ecosystem=<composer|npm|pip|…>&affects=<package>"` (GitHub's advisory database), and the repo's own at `https://github.com/<repo>/security/advisories`.
 
+### Private security issues
+
+Owned repos only, for users who are repo admins or security managers. Private vulnerability reports and unpublished advisories are repository security advisories:
+
+- List: `gh api "repos/<repo>/security-advisories?state=triage"` (new private reports) and `?state=draft` (accepted, not published). Each has `ghsa_id`, `summary`, `severity`, `state`, `updated_at`, `html_url` and `private_fork` (null until one exists). A 403 or 404 means the user or token lacks access: say so rather than "none".
+- In step 5, show a **Private security issues** table first: link, summary, state, severity, last updated, and whether it has a private fork. Triage reports wait on the maintainer to accept or close them.
+- The advisory's comments aren't in the API: link `html_url` for the user to read and reply.
+- Private fork: offer to create one for a triage or draft advisory with `gh api -X POST repos/<repo>/security-advisories/<ghsa_id>/forks`, shown first. Fix branches go there, never to the public repo, until the advisory is published.
+- Coordinated disclosure: keep these advisories, the vulnerability and its fix out of every public draft, PR, issue and commit message. Before acting on a public PR or issue that touches the same code, say whether it could disclose the report.
+
 ## GitHub token permissions
 
 The `gh` token only needs read access to triage. Write access is needed only for the actions above, which always wait for the user's go-ahead.
@@ -141,6 +151,7 @@ The `gh` token only needs read access to triage. Write access is needed only for
   - Pull requests: read, for listing, reviews, comments and files. Pull requests: write for approving, requesting changes, commenting and dismissing.
   - Issues: read, for listing issues and their comments. Issues: write for commenting on and closing issues.
   - Contents: read, for the compare API and `CODEOWNERS`.
+  - Repository security advisories: read, for "Private security issues". Write to create a private fork.
   - Actions: read and Commit statuses: read, for CI results. Fine-grained tokens can't have Checks: read, so `gh pr checks` fails with them; use the fallback in "Reading CI results".
   - `--all` searches only repos the token can read.
 - Team membership (`gh api user/teams`) may be unavailable to a fine-grained token. If it fails, the skill falls back to direct review requests.
