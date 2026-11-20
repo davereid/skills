@@ -19,9 +19,9 @@ The standard:
   Sunday and early Monday, before the work week. A missing one is printed with
   a suggested time in that window, spread by project and branch (`cron()`).
 - The default branch is protected.
-- No `CODEOWNERS` at the root of the default branch, and no protected branch
-  requires code owner approval: only maintainers can merge, so the merge is
-  the review.
+- No `CODEOWNERS` at the root of the default or protected branches: only
+  maintainers can merge, so the merge is the review. Code owner approval may
+  stay on, since it does nothing without one.
 """
 import json
 import subprocess
@@ -110,13 +110,12 @@ def check(p):
         elif scheduled[b].split()[4] not in SCHEDULE_DAYS:
             yield f"{b}'s schedule '{scheduled[b]}' isn't late Sunday or early Monday, suggest '{cron(name, b)}': {schedules_url}"
 
-    if glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(branch, safe='')}", missing_ok=True, raw=True) is not None:
-        yield f"CODEOWNERS at the root of {branch}: remove it in a merge request"
     if branch not in protected:
         yield f"default branch {branch} isn't protected: {url}/repository"
-    for b in protected.values():
-        if b.get("code_owner_approval_required"):
-            yield f"{b['name']} requires code owner approval, turn it off: {url}/repository"
+    # Code owner approval does nothing on a branch without CODEOWNERS.
+    for b in sorted({branch} | {n for n in protected if "*" not in n}):
+        if glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(b, safe='')}", missing_ok=True, raw=True) is not None:
+            yield f"CODEOWNERS at the root of {b}: remove it in a merge request"
 
 
 def main():
