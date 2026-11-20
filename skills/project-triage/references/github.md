@@ -94,6 +94,8 @@ The user's threads are those whose first comment's author is `$ME`. Resolve one:
 
 Your own PRs: `gh pr list -R <repo> --state open --author @me --limit 100 --json number,title,url,body,isDraft,reviewDecision,reviewRequests,reviews,headRefOid,updatedAt`.
 
+Your recently merged PRs: `gh pr list -R <repo> --state merged --author @me --search "merged:>=<date 30 days ago>" --limit 100 --json number,title,url,body,mergedAt`. With `--all`: `gh search prs --author=@me --merged-at=">=<date>" --limit 100 --json url,title,body`. Tick a task off by editing the description (`gh pr edit <n> --body-file <file>`), after reading the live one.
+
 ## Out-of-date branch
 
 Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/<baseRefName>...<headRefOid> -q .behind_by` (for a fork PR, `<owner>:<headRefName>` in place of the SHA if the SHA isn't found). Conflicts: `gh pr view <n> -R <repo> --json mergeable` is `CONFLICTING`; `UNKNOWN` means GitHub hasn't worked it out yet (often a conflict), so say "may conflict".

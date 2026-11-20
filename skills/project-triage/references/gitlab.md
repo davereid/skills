@@ -87,6 +87,8 @@ MRs the user reviewed or authored: `merge_requests?scope=all&reviewer_username=$
 
 Your own MRs: `projects/:id/merge_requests?state=opened&author_username=$ME&per_page=100`, with `detailed_merge_status` and the reviewer states.
 
+Your recently merged MRs: `projects/:id/merge_requests?state=merged&author_username=$ME&updated_after=<date 30 days ago>&per_page=100` (GitLab has no `merged_after` filter, so keep those whose `merged_at` is within the window). With `--all`: `merge_requests?scope=all&state=merged&author_username=$ME&updated_after=<date>&per_page=100`. Tick a task off with `glab mr update <iid> -R <repo> --description-file <file>`, after reading the live description.
+
 ## Out-of-date branch
 
 `projects/:id/merge_requests/<iid>?include_diverged_commits_count=true`: `diverged_commits_count` is how many commits the target branch has that the MR's branch doesn't, and `has_conflicts` is true when it conflicts. `detailed_merge_status` `need_rebase` means the project requires an up-to-date branch.
