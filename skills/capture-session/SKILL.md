@@ -31,11 +31,13 @@ Read the conversation from the start, including the summary of any earlier part,
 - **Open work:** tasks started but not finished, untested changes, follow-ups the user agreed to, and questions still open.
 - **Skill improvements:** steps a skill got wrong or missed, or something the user asked for that a skill could do next time.
 
-Drop what only mattered to this session, what's already written down (check the target file first), and what the repository already records (code, commits, docs).
+Drop what only mattered to this session, what's already written down, and what the repository already records (code, commits, docs). To check what's written down, search every file from step 1 for the same rule, not just the target file, including the files they import or point to (such as a conventions file the global instructions name) and shared checklists a skill uses. If another file already has it, propose nothing, or a change to that file if the session refined the rule.
 
 ## 3. Find outdated notes
 
 Check the files from step 1 that this session touched, or that cover work done in it, for entries that are now wrong: tasks it finished, plans it changed, facts it disproved, and items a merged PR covers. Check the remaining tasks of the open PRs or MRs the session worked on as well.
+
+Also look for rules that appear in more than one of these files, in the same or different words. Propose keeping each in the narrowest file that fits its scope (step 1) and removing the other copies, or replacing them with a short pointer when a reader of that file needs to know the rule exists. Rules in shared files, such as a committed `AGENTS.md` or a skill's checklist, stay there even when a personal file repeats them: remove the personal copy instead. Flag copies that disagree, and ask which wording is right.
 
 ## 4. Propose
 
