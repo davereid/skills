@@ -7,7 +7,7 @@
     {
       "name": "pr-skills",
       "source": "./",
-      "description": "Skills for pull requests: pr-fix (fix failing PRs in DDEV projects), project-triage (list the PRs and issues that need your review or a reply), and project-backlog (move local backlog notes into PRs and issues)."
+      "description": "Skills for pull requests: pr-fix (fix failing PRs in DDEV projects), project-triage (list the PRs and issues that need your review or a reply), project-backlog (move local backlog notes into PRs and issues), and capture-session (capture what a session taught)."
     }
   ]
 }
