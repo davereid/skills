@@ -7,7 +7,7 @@ description: Capture a session's lessons, decisions and open work in notes or is
 
 At the end of a working session, finds what's worth keeping from the conversation, such as corrections, preferences, conventions, decisions and unfinished work, and proposes where each belongs. It also finds notes the session made outdated. Nothing is written until the user approves it, except what their instructions allow without asking.
 
-Arguments: nothing. It works on the current conversation and the current checkout, if any.
+Arguments: nothing. It works on the current conversation and the checkouts the session worked in: the current one, and any other it edited or committed to.
 
 ## 1. Find the rules
 
@@ -35,7 +35,7 @@ Drop what only mattered to this session, what's already written down, and what t
 
 ## 3. Find outdated notes
 
-Check the files from step 1 that this session touched, or that cover work done in it, for entries that are now wrong: tasks it finished, plans it changed, facts it disproved, and items a merged PR covers. Check the remaining tasks of the open PRs or MRs the session worked on as well.
+Check the files from step 1, in every checkout the session worked in, that this session touched, or that cover work done in it, for entries that are now wrong: tasks it finished, plans it changed, facts it disproved, and items a merged PR covers. Check the remaining tasks of the open PRs or MRs the session worked on as well.
 
 Also look for rules that appear in more than one of these files, in the same or different words. Propose keeping each in the narrowest file that fits its scope (step 1) and removing the other copies, or replacing them with a short pointer when a reader of that file needs to know the rule exists. Rules in shared files, such as a committed `AGENTS.md` or a skill's checklist, stay there even when a personal file repeats them: remove the personal copy instead. Flag copies that disagree, and ask which wording is right.
 
