@@ -18,11 +18,10 @@ The standard:
   pipeline schedule, so it's tested weekly even without commits, between late
   Sunday and early Monday, before the work week. A missing one is printed with
   a suggested time in that window, spread by project and branch (`cron()`).
-- A `CODEOWNERS` at the root of the default branch that names the user.
-- When the user is the only maintainer (drupal.org's `root-admin` aside): the
-  default branch is protected, and every protected branch requires code owner
-  approval. With other maintainers, that's for the user to decide, so it's
-  only reported as a note.
+- The default branch is protected.
+- No `CODEOWNERS` at the root of the default branch, and no protected branch
+  requires code owner approval: only maintainers can merge, so the merge is
+  the review.
 """
 import json
 import subprocess
@@ -38,8 +37,6 @@ SETTINGS = {
 TITLE_REGEX = r"^(feat|fix|docs|test|refactor|chore|ci|build|perf|revert)(\([^)]+\))?!?: .+"
 TITLE_REGEX_DESCRIPTION = 'Use a Conventional Commit title, e.g. "fix: #1234567 Prevent duplicate log messages"'
 
-
-SYSTEM_ACCOUNTS = {"root-admin"}
 # Weekly schedules run between Sunday 22:00 and Monday 06:00.
 SCHEDULE_START = (0, 22)  # (cron weekday, hour)
 SCHEDULE_MINUTES = 8 * 60
@@ -88,7 +85,7 @@ def projects(names):
     return [p for page in pages for p in page if p["namespace"]["full_path"] == "project"]
 
 
-def check(p, me):
+def check(p):
     """Yield one line per deviation from the standard."""
     name, pid = p["path"], quote(f"project/{p['path']}", safe="")
     url = f"https://{HOST}/project/{name}/-/settings"
@@ -113,30 +110,19 @@ def check(p, me):
         elif scheduled[b].split()[4] not in SCHEDULE_DAYS:
             yield f"{b}'s schedule '{scheduled[b]}' isn't late Sunday or early Monday, suggest '{cron(name, b)}': {schedules_url}"
 
-    owners = glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(branch, safe='')}", missing_ok=True, raw=True)
-    if owners is None:
-        yield f"no CODEOWNERS at the root of {branch}"
-    elif f"@{me}" not in owners.split():
-        yield f"CODEOWNERS on {branch} doesn't name @{me}"
-
-    members = glab(f"projects/{pid}/members/all?per_page=100", paginate=True)
-    others = sorted({m["username"] for page in members for m in page
-                     if m["access_level"] >= 40 and m["username"] not in SYSTEM_ACCOUNTS | {me}})
-    if others:
-        yield f"note: other maintainers ({', '.join(others)}), so code owner approval is your call"
-        return
+    if glab(f"projects/{pid}/repository/files/CODEOWNERS/raw?ref={quote(branch, safe='')}", missing_ok=True, raw=True) is not None:
+        yield f"CODEOWNERS at the root of {branch}: remove it in a merge request"
     if branch not in protected:
         yield f"default branch {branch} isn't protected: {url}/repository"
     for b in protected.values():
-        if not b.get("code_owner_approval_required"):
-            yield f"{b['name']} doesn't require code owner approval: {url}/repository"
+        if b.get("code_owner_approval_required"):
+            yield f"{b['name']} requires code owner approval, turn it off: {url}/repository"
 
 
 def main():
-    me = glab("user")["username"]
     found = 0
     for p in sorted(projects(sys.argv[1:]), key=lambda p: p["path"]):
-        for line in check(p, me):
+        for line in check(p):
             found += 1
             print(f"{p['path']}: {line}")
     if not found:
