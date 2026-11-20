@@ -12,6 +12,8 @@ The standard:
 - Unresolved threads block merging ("All threads must be resolved"; SETTINGS).
 - Merge trains are off (SETTINGS): a contrib project rarely has merges queued
   at once, and a train reruns the whole pipeline before each merge.
+- Merge request titles must be Conventional Commits (TITLE_REGEX), since the
+  title becomes the merge commit's first line.
 - Each protected branch (the default and the release branches) has an active
   pipeline schedule, so it's tested weekly even without commits, between late
   Sunday and early Monday, before the work week. A missing one is printed with
@@ -33,6 +35,8 @@ SETTINGS = {
     "only_allow_merge_if_all_discussions_are_resolved": True,
     "merge_trains_enabled": False,
 }
+TITLE_REGEX = r"^(feat|fix|docs|test|refactor|chore|ci|build|perf|revert)(\([^)]+\))?!?: .+"
+TITLE_REGEX_DESCRIPTION = 'Use a Conventional Commit title, e.g. "fix: #1234567 Prevent duplicate log messages"'
 
 
 SYSTEM_ACCOUNTS = {"root-admin"}
@@ -91,6 +95,9 @@ def check(p, me):
     for key, want in SETTINGS.items():
         if p.get(key) != want:
             yield f"{key} is {p.get(key)}, want {want}: {url}/merge_requests"
+    if p.get("merge_request_title_regex") != TITLE_REGEX:
+        yield (f"merge request title regex is {p.get('merge_request_title_regex')!r}, want {TITLE_REGEX!r}"
+               f" with description {TITLE_REGEX_DESCRIPTION!r}: {url}/merge_requests")
 
     branch = p["default_branch"]
     protected = {b["name"]: b for b in glab(f"projects/{pid}/protected_branches")}
