@@ -31,6 +31,8 @@ In an owned project, _Needs review_ and _RTBC_ issues are listed as B even if th
 
 Sort every table by status first: _RTBC_, then _Needs review_, then the rest, most recently updated first within each. An MR takes its issue's status, so an MR whose issue is _RTBC_ comes first among the PRs too. Show the status in each row.
 
+For **Closed with open tasks**, an issue closed as fixed is a work item with `state::fixed` (add `labels=state::fixed` to the gitlab reference's "Recently closed issues" request), or, on issue-queue projects, status 2 _Fixed_ or 7 _Closed (fixed)_ in the "Issue-queue projects" list, read with `issue:show` for its summary and dates. Issues closed with a `why::` label (duplicate, won't fix, …) aren't fixed. The remaining tasks are in the issue summary's "Remaining tasks" section, usually as prose.
+
 ## Migrated issues
 
 Issues migrated from drupal.org's issue queue to work items are authored by `drupalbot` on GitLab. Find who really opened them, and when, before classifying:

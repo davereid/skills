@@ -96,6 +96,8 @@ Your own PRs: `gh pr list -R <repo> --state open --author @me --limit 100 --json
 
 Your recently merged PRs: `gh pr list -R <repo> --state merged --author @me --search "merged:>=<date 30 days ago>" --limit 100 --json number,title,url,body,mergedAt`. With `--all`: `gh search prs --author=@me --merged-at=">=<date>" --limit 100 --json url,title,body`. Tick a task off by editing the description (`gh pr edit <n> --body-file <file>`), after reading the live one.
 
+Recently merged PRs, by anyone: the same `gh pr list` without `--author @me`. Recently closed issues: `gh issue list -R <repo> --state closed --search "closed:>=<date 30 days ago> reason:completed" --limit 100 --json number,title,url,body,closedAt`. Tick an issue's task off with `gh issue edit <n> --body-file <file>`.
+
 ## Out-of-date branch
 
 Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/<baseRefName>...<headRefOid> -q .behind_by` (for a fork PR, `<owner>:<headRefName>` in place of the SHA if the SHA isn't found). Conflicts: `gh pr view <n> -R <repo> --json mergeable` is `CONFLICTING`; `UNKNOWN` means GitHub hasn't worked it out yet (often a conflict), so say "may conflict".
