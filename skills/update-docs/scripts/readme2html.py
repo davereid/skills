@@ -64,11 +64,13 @@ if len(args) != 1:
     sys.exit(__doc__.strip())
 
 lines = open(args[0]).read().split('\n')
-out, i, in_list, skip = [], 0, False, False
+# in_list is the open list's tag ('ul' or 'ol'), or '' when none is open.
+out, i, in_list, skip = [], 0, '', False
 def close_list():
     global in_list
     if in_list:
-        out.append('</ul>'); in_list = False
+        out.append(f'</{in_list}>'); in_list = ''
+item = re.compile(r'(- |\d+\. )')
 while i < len(lines):
     l = lines[i]
     if l.startswith('# '):
@@ -103,16 +105,18 @@ while i < len(lines):
         else:
             close_list(); out.append(pre)
         i += 1; continue
-    if l.startswith('- '):
+    m = item.match(l)
+    if m:
         # The output is the project page, so leave out the link to it.
         if l.startswith('- For a full description of the module'):
             i += 1; continue
-        if not in_list:
-            out.append('<ul>'); in_list = True
-        out.append('  <li>' + inline(l[2:]) + '</li>')
+        tag = 'ul' if m.group(1) == '- ' else 'ol'
+        if in_list != tag:
+            close_list(); out.append(f'<{tag}>'); in_list = tag
+        out.append('  <li>' + inline(l[m.end():]) + '</li>')
         i += 1; continue
     if l.strip() == '':
-        if in_list and i + 1 < len(lines) and (lines[i+1].startswith('- ') or lines[i+1].startswith('    ')):
+        if in_list and i + 1 < len(lines) and (item.match(lines[i+1]) or lines[i+1].startswith('    ')):
             i += 1; continue
         close_list(); i += 1; continue
     close_list()
