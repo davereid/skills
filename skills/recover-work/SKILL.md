@@ -56,7 +56,12 @@ These exist only in the source, so check each against the current checkout:
 - If not, check whether the code moved: search the default branch for its class or function names, and diff it with a file of the same path.
 - Sort each file: already there; personal data or secrets (don't transfer); local-only scripts and settings (scratch PHP files, local `settings.php`, data exports); evidence for a ticket (attach it there, don't commit it); or work in progress to decide.
 
-A missing class or hook that branches or stashes refer to (e.g. a plugin ID registered but never defined) is often an untracked file in the source: search there first.
+Untracked files and imported branches or stashes are often halves of the same work, so search both ways:
+
+- For each untracked file still to decide, search the imported refs for the classes, functions, hooks and plugin IDs it defines (`git grep <name> <ref>` over `recover-<name>/*` and `refs/recover-stash/<name>/*`).
+- For each branch or stash, look for names it uses but never defines (e.g. a plugin ID registered with no plugin class), and search the untracked files for them.
+
+Treat a match as one item to decide, and note what links them (e.g. "stash 9 registers `helper_coalesce_date`; untracked `CoalesceDateFilter.php` defines it"). A match is a guess until the user confirms it in step 6.
 
 ## 5. Write the summary
 
@@ -65,7 +70,7 @@ Write the findings to one Markdown file for the whole source, outside every chec
 - how the imported refs are kept, and the commands to remove them (from the script's header);
 - new branches, with commit, source (branch, stash or file) and a summary;
 - branches with nothing to transfer, grouped by reason;
-- branches, stashes and files to decide, as checkboxes with a summary each and their status;
+- branches, stashes and files to decide, as checkboxes with a summary each and their status; list a step 4 match as one item, saying what links its parts;
 - every stash in a table (number, date, original branch, status, summary), so none needs reading again;
 - next steps, and what a new session needs to know to continue: where the refs are, the project's branch and commit conventions, which items the user has decided.
 
@@ -74,6 +79,8 @@ Keep it up to date as work moves, so a later session can pick up from it.
 ## 6. Choose and transfer
 
 Ask the user which "to decide" items to transfer, using the agent's question prompt with multiple choice if it has one. Recommend the obvious ones and say why.
+
+Before transferring a step 4 match, show its parts and what links them, and ask whether to transfer them together or separately. Transfer confirmed matches onto one branch; record split ones as separate items in the summary.
 
 For each chosen item:
 
