@@ -27,7 +27,9 @@ die() { echo "$*" >&2; exit 1; }
 cmd_repos() {
   local dir git root
   for dir in "$@"; do
-    find "$dir" \( -name node_modules -o -name vendor \) -prune -o -name .git -print 2>/dev/null | while read -r git; do
+    # vendor/ is scanned: Composer installs dev versions and --prefer-source
+    # packages as Git clones there, which can hold local edits.
+    find "$dir" -name node_modules -prune -o -name .git -print 2>/dev/null | while read -r git; do
       root=$(dirname "$git")
       # The first root commit identifies a project across hosts and mirrors.
       printf '%s\t%s\t%s\n' "$root" \

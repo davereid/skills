@@ -21,7 +21,7 @@ Arguments: the directory to search (e.g. `/Volumes/Backup/code/site`), and optio
 
 ## 1. Find and match repositories
 
-- `recover.sh repos <source dir>` lists every repository under it, including ones nested inside another (e.g. contrib modules cloned in a site's `web/modules`), with their first root commit and remotes. Skip ones that aren't real projects (empty, or a hidden copy such as `.entity_usage` with no work in it, once checked).
+- `recover.sh repos <source dir>` lists every repository under it, including ones nested inside another (e.g. contrib modules cloned in a site's `web/modules`), with their first root commit and remotes. Hidden directories (e.g. `.entity_usage`) are often old copies, but check them like any other: they can hold uncommitted work. Only skip a repository once its inventory shows nothing to recover.
 - Match each one to a current checkout by root commit: `recover.sh repos <checkouts dir>` and compare. The root commit matches across hosts and mirrors where remote URLs differ (`git.drupal.org` and `git.drupalcode.org`, GitHub and an enterprise mirror).
 - For a repository with no current checkout, run step 2's inventory on it first. If it has nothing to recover (no branches beyond ones already on its remote, no stashes, no uncommitted files), skip it without asking. Otherwise show what it has and ask whether to clone a checkout, following the user's conventions for where checkouts go, or skip it.
 - Record every skipped repository in the summary, with the reason, so none is forgotten.
