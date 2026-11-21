@@ -23,6 +23,8 @@ For each issue it summarizes the report and the replies since your last comment,
 
 With `--mine`, it lists your own open PRs instead, with what each is waiting on: changes requested, unresolved threads, failing CI, unchecked tasks in the description, or a review. For a PR with work left, it offers to hand off to `/pr-fix` if that skill is installed. It also offers to review and simplify your PR on its branch, applying cleanups (such as Claude Code's `/simplify`) for you to commit. Add `--issues` for your own issues that have new replies.
 
+With `version 2.3.0` or `milestone 2026-12-02`, it lists the work planned for one release, everyone's including drafts, with what each item is waiting on and how many are done. The plan is a milestone on GitHub and GitLab, and a "Plan for <Project> <version>" issue with a task list on drupal.org, which has no milestones. If there's no plan yet, it offers to create one from the open PRs and issues you pick.
+
 Everything it drafts is for you to verify. It never approves, comments, requests changes or closes anything without your answer for that item, after showing the exact text.
 
 
@@ -62,8 +64,10 @@ With the plugin install, use `/pr-skills:project-triage` instead of `/project-tr
 | `--approved`, `--changes-requested` | Only PRs you last approved, or requested changes on |
 | `--all-prs` | Also list the PRs that don't match your profile, and the issues waiting on others |
 | `/project-triage --mine` | Your own open PRs and what each is waiting on (add `--all` for every repository, `--issues` for your own issues with new replies) |
+| `/project-triage version 2.3.0` | The work planned for a release, and what each item is waiting on |
+| `/project-triage milestone 2026-12-02` | The same, by milestone title or due date |
 
-Without `--mine`, it skips drafts and your own PRs and issues.
+Without `--mine`, `version` or `milestone`, it skips drafts and your own PRs and issues.
 
 `--all` finds repositories you own or were added to directly, but not organization repositories you administer only through a team: triage those one at a time.
 

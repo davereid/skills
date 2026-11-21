@@ -86,6 +86,15 @@ Searching needs no login or extra tools: the `curl` commands below read public p
 - Read a candidate with `drupalorg issue:show <nid> --with-comments --format=llm`.
 - Commenting upstream: work-item projects as in "Actions", which needs `glab` logged in to `git.drupalcode.org`; issue-queue projects (such as core), or without that login, give the user the text and the issue link.
 
+## Release plan
+
+drupal.org projects have no milestones, and the API refuses to create milestones or labels. A release is a plan issue, titled `Plan for <Project> <version>` (category Task, version the release's branch), whose description has a `## Remaining tasks` task list with one item per MR or issue: `- [ ] !<iid> #<nid> <title>`, or `- [ ] #<nid> <title>` for an issue with no MR yet. Each listed issue is also linked to the plan as a related item.
+
+- Find it: search the project's issues for `Plan for` and the version or date (`gitlab.md`'s issue search for work items; the issue-queue search in "Searching upstream" otherwise), including closed ones. Its items are the task list's `!<iid>` and `#<nid>` references, plus related items (`projects/:id/issues/<nid>/links`) the list is missing; say which these are.
+- Create (work items): `glab api --hostname git.drupalcode.org -X POST "projects/project%2F<name>/issues" -f title=… -f labels="category::task,v<branch>-dev,priority::normal,state::active" -f description="$(cat <file>)"`, then link each issue: `-X POST "projects/project%2F<name>/issues/<plan nid>/links" -f target_project_id=<project id> -f target_issue_iid=<nid> -f link_type=relates_to`. Issue-queue projects: give the user the title, description and fields to file it themselves.
+- Tick off an item when its MR merges, or its issue closes: edit the plan's description, keeping everything else. Close the plan after the release is tagged.
+- Remove an item: delete its line, and its link (`-X DELETE "projects/project%2F<name>/issues/<plan nid>/links/<link id>"`).
+
 ## Supported branches
 
 `drupalorg project:releases <name>` lists the latest release of each supported branch (e.g. `2.1.0`, `8.x-1.51`, `7.x-1.9` → `2.x`, `8.x-1.x`, `7.x-1.x`).

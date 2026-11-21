@@ -23,7 +23,7 @@ Which items are looked at depends on whether the user owns the repo:
 - **Owned** (the user owns or maintains it; each host's reference says exactly what counts): every open PR and issue from others. A maintainer usually wants to see all of them, so the profile's `match` rules and skill set don't narrow this list; only `exclude` rules do.
 - **Not owned:** PRs that request the user's review, that they reviewed, or that match their profile, and issues assigned to them.
 
-With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues").
+With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues"). With `version <version>` or `milestone <name>`, it lists the work planned for one release and what each item is waiting on (see "A release").
 
 ## Rules
 
@@ -59,6 +59,7 @@ With `--mine`, it lists the user's own open PRs instead, with what each is waiti
 - **Which repos:** no number: the current repo (see **Repo**). `--all` searches every repo the user can read (review requests, reviews, issues assigned to them, and the repos they own), and applies the user profile only. If the host's reference says some owned repos can't be found this way, say so, and suggest triaging those one at a time.
 - **Owned:** check whether the user owns each repo, with the rule and commands in the host's reference ("Ownership").
 - `--mine`: go to "Your own PRs" (and "Your own issues" with `--issues`), with the same repo scope. It doesn't use the profile.
+- `version <version>` (e.g. `version 2.3.0`) or `milestone <name>` (e.g. `milestone 2026-12-02`): go to "A release", for the current repo or `owner/repo` (not `--all`). It doesn't use the profile.
 - Load the profile (see "Profile"). Find the user's teams; if that fails, say so and use direct review requests only.
 
 ### 2. Fetch once
@@ -353,6 +354,19 @@ For every selected PR, also offer **Review and simplify**: check out its branch 
 ### Your own issues (`--mine --issues`)
 
 Fetch the user's own open issues, and keep those where someone else commented after the user's latest comment (or after the issue was opened, if the user hasn't commented). Count the others as "waiting on others". Show one table, most recently updated first: number, title, last updated, who replied and when. Ask which to handle now, then handle each as in step 9 (for **Comment and close**, e.g. because it's resolved).
+
+### A release (`version` or `milestone`)
+
+Shows what's left before a release can be tagged. Find the release's plan with the host's reference ("Release plan"): `version <version>` finds it by version, `milestone <name>` by milestone title, and if no title matches, by a milestone whose due date is `<name>`. If nothing is found, say what was searched and offer **Create a plan**: list candidates (open PRs targeting the release's branch, and open bug reports and feature requests filed against it), ask which to include (multi-select), and create the milestone or plan issue the reference describes, after showing it.
+
+Include every item in the plan, by anyone, including drafts and the user's own; the profile's `exclude` rules don't apply. For each open PR, read what it's waiting on, as in "Your own PRs" (changes requested, unresolved threads, CI failing, out of date or conflicts, remaining tasks, waiting for review, ready to merge, draft). For an issue, show its status and its open PRs, or "no PR".
+
+Show one table, **Ready to merge** first, then by how much is left: PR or issue, title, author, last updated, size, and what it's waiting on. Above it: "N of M done", counting merged PRs and closed issues. Under it, list:
+
+- Items that target another branch than the release's (see "Target branch and backports").
+- Items that are merged or closed, but whose task in the plan isn't ticked off: offer **Tick off**, showing the change first.
+
+Ask which items to handle now (multi-select, with "none"), and handle them one at a time, as in step 5: someone else's PR as an A or B PR (steps 6 to 8), the user's own PR as in "Your own PRs" (including **Merge**), and an issue as in step 9. Also offer **Remove from the release**, showing the change to the milestone or plan first.
 
 ## Project issue tracker
 

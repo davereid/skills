@@ -123,6 +123,15 @@ Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/
 - Merge: `gh pr merge <n> -R <repo> --squash --match-head-commit <headRefOid>` (or `--merge`, `--rebase`; the SHA makes GitHub refuse if new commits landed), with the methods the repo allows from `gh repo view <repo> --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,deleteBranchOnMerge`. `--subject` and `--body` set the commit message; a squash merge defaults to the PR title. Add `--delete-branch` only when the repo doesn't delete branches itself and the user agrees. If required checks are still running, offer `--auto` instead, which merges once they pass. A merge blocked by a ruleset or branch protection fails: report the reason, and don't retry with `--admin` unless the user asks.
 - Rebase: `gh pr update-branch <n> -R <repo> --rebase`. Needs push access to the head branch (for a fork, "Allow edits from maintainers").
 
+## Release plan
+
+A release is a milestone.
+
+- Find it: `gh api "repos/<repo>/milestones?state=all&per_page=100"`, matching `title` (the version, or the milestone name), or the first 10 characters of `due_on` for a date.
+- Items: `gh pr list -R <repo> --state all --limit 100 --search 'milestone:"<title>"' --json number,title,url,author,state,isDraft,baseRefName,updatedAt`, and `gh issue list -R <repo> --state all --limit 100 --milestone "<title>" --json number,title,url,author,state,labels,updatedAt`.
+- Create: `gh api -X POST "repos/<repo>/milestones" -f title=<version>` (add `-f due_on=<date>T00:00:00Z` for a date), then `gh pr edit <n> -R <repo> --milestone "<title>"` or `gh issue edit` for each item.
+- Remove an item: `gh pr edit <n> -R <repo> --remove-milestone` (or `gh issue edit`).
+
 ## Supported branches
 
 The default branch (`gh repo view <repo> --json defaultBranchRef`), plus release branches with a recent release (`gh release list -R <repo>`, matched to branches by version) or named in the project's docs (`SECURITY.md`'s supported versions). Ask the user if it's unclear.

@@ -113,6 +113,15 @@ Recently merged MRs, by anyone: the same request without `author_username`. Rece
 - Merge: check `detailed_merge_status` is `mergeable` (in `projects/:id/merge_requests/<iid>`). When the project's `merge_method` is `ff` (fast-forward only), also check `diverged_commits_count` is 0 (`?include_diverged_commits_count=true`): a branch behind its target needs **Rebase** (below) first, even when `detailed_merge_status` says `mergeable`, or the merge fails with `405 Method Not Allowed` (2026-11-18, embed !29). The rebase starts a new pipeline: wait for it before merging. Then `glab mr merge <iid> -R <repo> --yes --sha <sha>` (the full 40-character `sha`: a short one fails with `409 SHA does not match HEAD of source branch`, 2026-11-18, embed !34; GitLab also refuses if new commits landed), adding `--squash` when the project's `squash_option` is `always` or `default_on` (or the user picks it) and `--squash-message`/`--message` for the commit message. `--auto-merge` is on by default, so a running pipeline makes it merge later, once the pipeline passes: say so, or pass `--auto-merge=false` if the user wants it merged now or not at all. For drupal.org, use `drupalorg.md`'s "Merge" instead.
 - Rebase: `glab api --hostname <host> -X PUT "projects/:id/merge_requests/<iid>/rebase"`, then check `merge_requests/<iid>?include_rebase_in_progress=true` until `rebase_in_progress` is false and `merge_error` is null. Needs push access to the source branch; GitLab refuses it when `has_conflicts` is true.
 
+## Release plan
+
+A release is a milestone, in the project or one of its parent groups.
+
+- Find it: `projects/:id/milestones?include_ancestors=true&per_page=100`, matching `title` (the version, or the milestone name), or `due_date` for a date.
+- Items: `projects/:id/merge_requests?milestone=<title>&state=all&per_page=100` and `projects/:id/issues?milestone=<title>&state=all&per_page=100` (URL-encode the title).
+- Create: `glab api --hostname <host> -X POST "projects/:id/milestones" -f title=<version>` (add `-f due_date=<date>` for a date), then set each item's milestone: `-X PUT "projects/:id/merge_requests/<iid>" -F milestone_id=<id>` (or `issues/<iid>`).
+- Remove an item: the same `PUT` with `-F milestone_id=0`.
+
 ## Supported branches
 
 The default branch (`default_branch` in `projects/:id`), plus release branches with recent releases (`projects/:id/releases` or tags), or named in the project's docs. Ask the user if it's unclear.
