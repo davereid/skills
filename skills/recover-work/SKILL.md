@@ -83,6 +83,8 @@ For each chosen item:
 
 Mark each transferred item in the summary with its branch, PR, MR or issue.
 
+A branch left local, with no PR or MR yet, is invisible to later sessions in that project. Add it to the project's notes on current work, where the user's instructions say those go (such as an uncommitted local notes file), with its commit, what it does, what it's waiting on, and a link to the summary file. Ask first if the instructions don't say. Remove the entry once the branch has a PR or MR, or is deleted.
+
 ## 7. Clean up
 
 Once everything wanted has moved, remove this source's imported refs from each checkout (commands in the script's header), leaving other sources' alone, and the temporary worktrees, and ask whether the summary file can go, or should keep only its links to open issues, PRs and MRs. The source stays as it was: tell the user it's safe to archive or delete as far as these repositories go, and list anything left behind on purpose.
