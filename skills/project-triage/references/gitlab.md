@@ -97,6 +97,7 @@ Recently merged MRs, by anyone: the same request without `author_username`. Rece
 
 ## Actions
 
+- `pr-fix` supports GitHub only: don't offer **Fix it** for GitLab or drupal.org merge requests until its `SKILL.md` lists them. Offer to update the branch locally instead (merge the base in, or rebase as the user's force-push instructions allow), asking before the push (2026-11-21: offered for analytics !10, and `pr-fix` stopped).
 - Approve: `glab mr approve <iid> -R <repo>`, then the comment as a note.
 - Withdraw an approval: `glab mr revoke <iid> -R <repo>`.
 - Request changes: post the blocking comment as a note. Setting GitLab's "Requested changes" reviewer state through the API isn't verified: tell the user to submit the review with **Request changes** in the MR's UI if they want that state.
