@@ -116,6 +116,8 @@ Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/
 - Dismiss the user's own review: `gh api -X PUT repos/<repo>/pulls/<n>/reviews/<review-id>/dismissals -f message="<reason>"`. Not verified to work on the user's own reviews: if it fails, say so and offer request-changes or a comment.
 - Comment on an issue: `gh issue comment <n> -R <repo> --body "<text>"`
 - Close an issue: `gh issue close <n> -R <repo> --reason "<completed|not planned>"` after the comment.
+- Close as duplicate: start the comment with `Duplicate of #<kept>`, which GitHub recognizes and shows on both issues, then close it with `--reason "not planned"`.
+- Link related issues: GitHub has no related-issue link: mention the other issue in the comment.
 - Edit a PR's description: `gh pr edit <n> -R <repo> --body-file <file>`, after all edits to the file have succeeded.
 - Retarget: `gh pr edit <n> -R <repo> --base <branch>`. Before retargeting, compare `gh api repos/<repo>/compare/<branch>...<headRefOid> -q .ahead_by` with the PR's commit count (`gh pr view <n> -R <repo> --json commits -q '.commits | length'`): when `ahead_by` is larger, the branch started from another branch.
 - Retitle a PR: `gh pr edit <n> -R <repo> --title "<title>"`. A title check workflow re-runs only if it triggers on `pull_request` `edited`. On PRs from forks, the new run may wait for approval (see "Pending workflow runs"). An edit to the description also triggers `edited` runs, so retitle before editing the description.

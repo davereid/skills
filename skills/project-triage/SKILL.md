@@ -23,7 +23,7 @@ Which items are looked at depends on whether the user owns the repo:
 - **Owned** (the user owns or maintains it; each host's reference says exactly what counts): every open PR and issue from others. A maintainer usually wants to see all of them, so the profile's `match` rules and skill set don't narrow this list; only `exclude` rules do.
 - **Not owned:** PRs that request the user's review, that they reviewed, or that match their profile, and issues assigned to them.
 
-With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues"). With `version <version>` or `milestone <name>`, it lists the work planned for one release and what each item is waiting on (see "A release").
+With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues"). With `version <version>` or `milestone <name>`, it lists the work planned for one release and what each item is waiting on (see "A release"). With `duplicates`, it looks for open issues that duplicate or overlap each other (see "Duplicates").
 
 ## Rules
 
@@ -59,6 +59,7 @@ With `--mine`, it lists the user's own open PRs instead, with what each is waiti
 - **Which repos:** no number: the current repo (see **Repo**). `--all` searches every repo the user can read (review requests, reviews, issues assigned to them, and the repos they own), and applies the user profile only. If the host's reference says some owned repos can't be found this way, say so, and suggest triaging those one at a time.
 - **Owned:** check whether the user owns each repo, with the rule and commands in the host's reference ("Ownership").
 - `--mine`: go to "Your own PRs" (and "Your own issues" with `--issues`), with the same repo scope. It doesn't use the profile.
+- `duplicates`: go to "Duplicates", for the current repo or `owner/repo` (not `--all`). It doesn't use the profile.
 - `version <version>` (e.g. `version 2.3.0`) or `milestone <name>` (e.g. `milestone 2026-12-02`): go to "A release", for the current repo or `owner/repo` (not `--all`). It doesn't use the profile.
 - Load the profile (see "Profile"). Find the user's teams; if that fails, say so and use direct review requests only.
 
@@ -300,6 +301,7 @@ Read the issue, its comments and the PRs linked to it. Show:
 3. **Since your last comment** (A): each new comment, one line each, with its author.
 4. **Linked PRs:** number, state and whether they're in this triage list.
 5. **Worth a closer look:** whether it looks like a bug in this project, in a dependency or upstream, a duplicate, a support question or a feature request, and what you'd check to be sure.
+6. **Possible duplicates:** other open issues, and issues closed in the last year, that ask for the same thing (see "Duplicates"), with how sure you are. Leave this out when nothing matches.
 
 Then ask: **Investigate** (for an issue with little detail, follow "Thin issues"; otherwise read the code, apply "Verify before commenting" and, when the cause may be in a dependency, "Check upstream"; then come back to these options), **Comment**, **Comment and close** (e.g. a duplicate, an upstream bug, or answered), **Skip**, plus any options the host's reference adds (such as setting an issue's status). Show the exact text (and the close reason or new status) and get the user's go-ahead first. Issue replies answer the reporter in plain prose, not Conventional Comments. Before posting, fetch the comments again, in case someone replied in the meantime.
 
@@ -367,6 +369,23 @@ Show one table, **Ready to merge** first, then by how much is left: PR or issue,
 - Items that are merged or closed, but whose task in the plan isn't ticked off: offer **Tick off**, showing the change first.
 
 Ask which items to handle now (multi-select, with "none"), and handle them one at a time, as in step 5: someone else's PR as an A or B PR (steps 6 to 8), the user's own PR as in "Your own PRs" (including **Merge**), and an issue as in step 9. Also offer **Remove from the release**, showing the change to the milestone or plan first.
+
+### Duplicates
+
+Issues get filed twice: a feature reported years ago is filed again when the work starts, or the same bug is reported in different words. Fetch every open issue (all pages, not just 100), and for each pair compare what they ask for, not just their titles: the problem, the proposed change, and the code they name (classes, methods, commands, settings, routes). Leave out pairs that only share a topic.
+
+Sort each pair into:
+
+- **Duplicate:** both ask for the same change. Say which to keep: the one with an open or merged PR, otherwise the one with more discussion or detail, otherwise the older one.
+- **Overlap:** different changes that share part of the work (e.g. two features needing the same helper), or one that would make the other easier.
+
+Show one table, duplicates first: the two issues (number, title, status, linked PRs), which kind, how sure you are, and in one line what they share and what only one of them has. Say how many issues were compared. Then ask which pairs to handle (multi-select, with "none"), and handle each one at a time:
+
+- **Close as duplicate:** comment on the closed issue linking the one kept, and close it with the host's duplicate reason (the reference's "Actions"). Before that, list what only the closed issue has (ideas, steps to reproduce, a use case): offer to add each to the kept issue's description or remaining tasks, showing the change first, so nothing is lost. If someone other than the user contributed to the closed issue, check how the host credits them (on drupal.org, the contribution record), and say so.
+- **Link as related:** link the two issues (the host's related-items link, or a comment mentioning the other where it has none), with a one-line comment on each saying what they share, e.g. a helper both should use.
+- **Skip.**
+
+Show every comment and change first, and get the user's go-ahead for each pair.
 
 ## Project issue tracker
 
