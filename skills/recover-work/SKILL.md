@@ -33,6 +33,8 @@ Arguments: the directory to search (e.g. `/Volumes/Backup/code/site`), and optio
 
 ## 3. Import and sort branches and stashes
 
+If the source's summary file (step 5) already exists, read it first: keep the items already decided or transferred, with their links, and only ask about new ones. Triage can't tell that work was ported with changes, so without the file it offers finished items again.
+
 `recover.sh import <source repo> <checkout> <name>` fetches the source's branches as `recover-<name>/*` (a remote that can't push) and its stashes as `refs/recover-stash/<name>/<n>`, numbered as in `git stash list`. Use the summary file's name for `<name>` (e.g. `md-cms-backup`), so the same project from several sources, such as a contrib module cloned in several sites, can sit in one checkout side by side. The script refuses a name already used for a different source. Everything after this works in the current checkout, and the source isn't needed again.
 
 `recover.sh triage <checkout> <name> [<base>]` sorts one source's branches and stashes against the default branch:
