@@ -90,6 +90,7 @@ For each chosen item:
 - **Open source projects the user maintains or contributes to:** search the issue queue first. File an issue for work that has none, push the branch to the issue's fork or a branch, and open a draft merge request. Remaining work goes in the merge request's tasks. Leave old work already on a pushed branch or open merge request alone, but list it.
 - Files copied from FAT or exFAT drives all look executable: reset modes (e.g. `chmod 644`, and `755` for scripts) before committing.
 - Ask before each push, and write PR or MR descriptions following the user's conventions.
+- Don't wait for pipelines after pushing: once work has an issue, PR or MR, failing checks can be triaged in the project later. Move on to the next item.
 
 Mark each transferred item in the summary with its branch, PR, MR or issue.
 
