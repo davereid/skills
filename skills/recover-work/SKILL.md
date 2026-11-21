@@ -88,6 +88,7 @@ For each chosen item:
 
 - **Site or client projects:** create a branch in a temporary worktree from the default branch. Apply the change (`git cherry-pick`, `git stash apply refs/recover-stash/<name>/<n>`, or copy files) and split unrelated changes into separate branches. Follow the project's branch naming and commit message conventions (its `AGENTS.md`, contributing docs and commit hooks), and ask for a ticket number when the convention needs one. Fix bugs found while reviewing the old code, and say what changed from the original. Run the project's checks. If its commit hooks can't run in the worktree (e.g. they run through a container that only mounts the main checkout), run the checks by hand and ask before committing without hooks.
 - **Open source projects the user maintains or contributes to:** search the issue queue first. File an issue for work that has none, push the branch to the issue's fork or a branch, and open a draft merge request. Remaining work goes in the merge request's tasks. Leave old work already on a pushed branch or open merge request alone, but list it.
+- Files copied from FAT or exFAT drives all look executable: reset modes (e.g. `chmod 644`, and `755` for scripts) before committing.
 - Ask before each push, and write PR or MR descriptions following the user's conventions.
 
 Mark each transferred item in the summary with its branch, PR, MR or issue.
