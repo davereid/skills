@@ -53,6 +53,7 @@ Ask which to apply (multi-select per table, with "none"). Change any draft the u
 ## 5. Apply
 
 - Edit each file only with approved items. Keep its structure: add items under the heading they belong to, and update any list of headings the file keeps.
+- When an item refines or extends a rule already in the file, rewrite that rule to cover both, rather than adding a separate sentence or bullet next to it.
 - For a PR or MR, read the live description first and keep everything in it. Follow the user's instructions for updating descriptions, such as saving a copy.
 - For a skill, edit its files in its checkout, and say which branch they're on. Don't commit or push unless the user's instructions or answer say to.
 - Public text (a PR, an issue, committed files) must not name clients, client projects or their content.
