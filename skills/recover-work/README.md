@@ -38,8 +38,8 @@ The first argument is the directory to search, and the second (optional) is wher
 |---|---|
 | `recover.sh repos <dir>...` | Lists the Git repositories under each directory, with their root commit and remotes |
 | `recover.sh inventory <source>` | Lists a repository's branches, stashes, modified and untracked files |
-| `recover.sh import <source> <checkout>` | Copies the source's branches and stashes into the checkout |
-| `recover.sh triage <checkout> [<base>]` | Sorts the copied branches and stashes: already in the base, applies, or conflicts |
+| `recover.sh import <source> <checkout> <name>` | Copies the source's branches and stashes into the checkout, kept apart from other sources under `<name>` |
+| `recover.sh triage <checkout> <name> [<base>]` | Sorts one source's copied branches and stashes: already in the base, applies, or conflicts |
 | `recover.sh file-in <file> <checkout>` | Shows whether a file's exact content is in the checkout's history |
 
 

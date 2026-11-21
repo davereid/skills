@@ -33,9 +33,9 @@ Arguments: the directory to search (e.g. `/Volumes/Backup/code/site`), and optio
 
 ## 3. Import and sort branches and stashes
 
-`recover.sh import <source repo> <checkout>` fetches the source's branches as `backup-source/*` (a remote that can't push) and its stashes as `refs/backup-stash/<n>`, numbered as in `git stash list`. Everything after this works in the current checkout, and the source isn't needed again.
+`recover.sh import <source repo> <checkout> <name>` fetches the source's branches as `recover-<name>/*` (a remote that can't push) and its stashes as `refs/recover-stash/<name>/<n>`, numbered as in `git stash list`. Use the summary file's name for `<name>` (e.g. `md-cms-backup`), so the same project from several sources, such as a contrib module cloned in several sites, can sit in one checkout side by side. The script refuses a name already used for a different source. Everything after this works in the current checkout, and the source isn't needed again.
 
-`recover.sh triage <checkout> [<base>]` sorts them against the default branch:
+`recover.sh triage <checkout> <name> [<base>]` sorts one source's branches and stashes against the default branch:
 
 - **NOOP:** the change is already in the base.
 - **APPLIES:** it would merge cleanly.
@@ -47,7 +47,7 @@ Then sort each one:
 
 - **Nothing to transfer:** NOOP; the tip is on another branch or remote; or a merged PR or MR from a branch of that name has the same commits (squash merges and rebases don't show up in the count). Check with the host's CLI (`gh pr list --head <branch> --state all`, `glab mr list --source-branch <branch> --all`).
 - **Probably obsolete:** the code it changes has since been removed or rewritten, or a later branch or stash supersedes it. Say what shows that.
-- **To decide:** everything else. Read each stash's diff (`git stash show -p refs/backup-stash/<n>`, or `git diff <stash>^1 <stash>`, which includes the index) and summarize it in a sentence. Group stashes that are copies of the same change. Note when one stash mixes unrelated changes: they become separate branches.
+- **To decide:** everything else. Read each stash's diff (`git stash show -p refs/recover-stash/<name>/<n>`, or `git diff <stash>^1 <stash>`, which includes the index) and summarize it in a sentence. Group stashes that are copies of the same change. Note when one stash mixes unrelated changes: they become separate branches.
 ## 4. Uncommitted and untracked files
 
 These exist only in the source, so check each against the current checkout:
@@ -77,7 +77,7 @@ Ask the user which "to decide" items to transfer, using the agent's question pro
 
 For each chosen item:
 
-- **Site or client projects:** create a branch in a temporary worktree from the default branch. Apply the change (`git cherry-pick`, `git stash apply refs/backup-stash/<n>`, or copy files) and split unrelated changes into separate branches. Follow the project's branch naming and commit message conventions (its `AGENTS.md`, contributing docs and commit hooks), and ask for a ticket number when the convention needs one. Fix bugs found while reviewing the old code, and say what changed from the original. Run the project's checks. If its commit hooks can't run in the worktree (e.g. they run through a container that only mounts the main checkout), run the checks by hand and ask before committing without hooks.
+- **Site or client projects:** create a branch in a temporary worktree from the default branch. Apply the change (`git cherry-pick`, `git stash apply refs/recover-stash/<name>/<n>`, or copy files) and split unrelated changes into separate branches. Follow the project's branch naming and commit message conventions (its `AGENTS.md`, contributing docs and commit hooks), and ask for a ticket number when the convention needs one. Fix bugs found while reviewing the old code, and say what changed from the original. Run the project's checks. If its commit hooks can't run in the worktree (e.g. they run through a container that only mounts the main checkout), run the checks by hand and ask before committing without hooks.
 - **Open source projects the user maintains or contributes to:** search the issue queue first. File an issue for work that has none, push the branch to the issue's fork or a branch, and open a draft merge request. Remaining work goes in the merge request's tasks. Leave old work already on a pushed branch or open merge request alone, but list it.
 - Ask before each push, and write PR or MR descriptions following the user's conventions.
 
@@ -85,4 +85,4 @@ Mark each transferred item in the summary with its branch, PR, MR or issue.
 
 ## 7. Clean up
 
-Once everything wanted has moved, remove the imported refs from each checkout (commands in the script's header) and the temporary worktrees, and ask whether the summary file can go, or should keep only its links to open issues, PRs and MRs. The source stays as it was: tell the user it's safe to archive or delete as far as these repositories go, and list anything left behind on purpose.
+Once everything wanted has moved, remove this source's imported refs from each checkout (commands in the script's header), leaving other sources' alone, and the temporary worktrees, and ask whether the summary file can go, or should keep only its links to open issues, PRs and MRs. The source stays as it was: tell the user it's safe to archive or delete as far as these repositories go, and list anything left behind on purpose.
