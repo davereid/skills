@@ -39,7 +39,7 @@ Use it whenever the docs may be out of date: when a change adds or changes a fea
    ```
    Two short paragraphs of plain text for site builders and content editors: what the module does for them and its most useful features. Open with what the module gives them, in concrete terms ("a clear, central place to see what's going on with your site's content and structure"), not a vague benefit ("keeps your site in good shape", "healthy", "powerful", "easy"): every claim should say what someone can see or do. No technical terms (plugins, APIs, Drush, cache tags, class names), no requirements, US English, no `--` (it ends an HTML comment).
 7. Older versions of this skill wrote `project.html` and `summary.html`. If either is untracked, `README.html` and its summary comment replace them: move the summary over from either file, then ask before deleting them.
-8. Remind the user to paste `README.html` (without the summary comment) into the project page's description, and the summary into its summary field, once the change is released, and to review the summary's wording first.
+8. Remind the user to paste `README.html` (without the summary comment) into the project page's description, and the summary into its summary field, once the change is released, and to review the summary's wording first. To copy it without the summary: `sed '1,/^-->$/d' README.html | pbcopy` on macOS, or `| xclip -selection clipboard` on Linux.
 
 
 ## README template
