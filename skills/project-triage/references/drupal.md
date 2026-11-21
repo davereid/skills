@@ -29,7 +29,9 @@ Look for code that does by hand what core provides:
 - Non-static callbacks stored in a form (`#element_validate`, `#validate`, `#entity_builders`); render callbacks (`#pre_render`, `#lazy_builder`) without `#[TrustedCallback]`.
 - `$container->has() ? $container->get() : NULL` instead of `ContainerInterface::NULL_ON_INVALID_REFERENCE`.
 - Update hooks that load or save entities, or call services that invoke hooks; `hook_deploy_NAME()` in a contributed module (it only runs through Drush).
-- Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows.
+- Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows: read that version's code, not the installed core.
+- PHP functions or syntax newer than the lowest PHP version the lowest supported core requires.
+- APIs removed or deprecated in the next core major, or in the next major of Symfony components the code uses. Say in the review which versions were checked.
 - New `@deprecated` code or breaking changes without a change record: the `@trigger_error()` message and `@see` should link one (a draft is fine until the release), with the version that will first ship it.
 - Tests that use `expectExceptionMessage()`, which PHPUnit 13 deprecates, instead of `expectExceptionObject()`; its replacement, `expectExceptionMessageIsOrContains()`, doesn't exist before PHPUnit 13.
 - A contrib dependency that's only in `composer.json`, or a version constraint in `.info.yml`: drupal.org builds Composer requirements from `.info.yml`, and CI builds the test site from `composer.json` (`require-dev`).
