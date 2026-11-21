@@ -48,7 +48,7 @@ With `--mine`, it lists the user's own open PRs instead, with what each is waiti
   - `gitlab.com`, or a hostname containing `gitlab`: `references/gitlab.md`.
   - Any other host: ask whether it's GitHub Enterprise or GitLab.
 
-  Whatever the host, if the codebase is a Drupal site or extension (its `composer.json` requires `drupal/core` or `drupal/core-recommended`, or it has an `*.info.yml` file at its root or under `modules/` or `web/modules/`), also load `references/drupal.md` for reviews.
+  Whatever the host, if the codebase is PHP (it has `.php` files outside `vendor/`), also load `references/php.md` for reviews. If it's a Drupal site or extension (its `composer.json` requires `drupal/core` or `drupal/core-recommended`, or it has an `*.info.yml` file at its root or under `modules/` or `web/modules/`), also load `references/drupal.md` for reviews.
 
   If the repo has `.claude/project-triage-issues.md` with a "Fetching issues" section (see "Project issue tracker"), use it instead of the host reference for every issue step.
 
@@ -210,7 +210,7 @@ In every review, look for code that reimplements something the project, its fram
 
 - **Search, don't recall:** for each new helper, service, hook or pattern, search the framework's and dependencies' source as installed in the user's checkout (e.g. `vendor/`, or `web/core` and `web/modules/contrib` in a Drupal site or a module set up with ddev-drupal-contrib) for code doing the same job, and cite the file and line you found. The review checkout usually has no installed dependencies, so search the user's checkout, and say so when it isn't installed.
 - **Static analysis first:** read the framework-aware linters' results in the PR's CI (e.g. phpstan with the framework's extension and deprecation rules), or run them in the review checkout. They catch deprecated APIs and many anti-patterns without judgment calls.
-- **Framework reference:** in a Drupal codebase, also check `references/drupal.md` (see step 1).
+- **Language and framework references:** in a PHP codebase, also check `references/php.md`, and in a Drupal codebase `references/drupal.md` (see step 1).
 - **Report-only review skills:** if the agent has a review skill that reports code that should be deleted, reused or merged without editing files (e.g. ponytail's `ponytail-review`), use its findings here, verified as "Verify before commenting" says. Never run a skill that edits files (e.g. Claude Code's `/simplify`) on someone else's PR, except in the review checkout with its edits discarded.
 
 For a workaround or a copy of upstream code, check whether a newer upstream release already has the fix or API (see "Check upstream" in step 9). Name the existing API or release in the suggestion, as `**suggestion (non-blocking):**`, and say what you checked (e.g. the helper's signature at the PR's base).
