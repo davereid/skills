@@ -44,6 +44,7 @@ Look for code that does by hand what core provides:
 - A contrib dependency that's only in `composer.json`, or a version constraint in `.info.yml`: drupal.org builds Composer requirements from `.info.yml`, and CI builds the test site from `composer.json` (`require-dev`).
 - A new setting that changes existing sites' behavior, turned on in code rather than only in `config/install`.
 - Constraint violations reported on the field list rather than the property they're about (`atPath()`).
+- `#cache` or a `#lazy_builder` inside an `#attached['html_head']` item: core renders those items in isolation after the page's cacheability is final, so the cache metadata is lost and the lazy builder is never replaced. Put the cacheability on the render array that carries the attachment.
 - Code for another module's routes, such as a route-name case, that was only tested with a hand-built `RouteMatch`: inbound path processors can rewrite paths before routing, so check which route the real router matches for the URL, with that module installed.
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
