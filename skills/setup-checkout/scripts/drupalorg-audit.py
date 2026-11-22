@@ -95,6 +95,9 @@ def check(p):
     if p.get("merge_request_title_regex") != TITLE_REGEX:
         yield (f"merge request title regex is {p.get('merge_request_title_regex')!r}, want {TITLE_REGEX!r}"
                f" with description {TITLE_REGEX_DESCRIPTION!r}: {url}/merge_requests")
+    if not p.get("issues_enabled"):
+        yield ("issues are in drupal.org's issue queue, not GitLab work items: request the move on"
+               " https://git.drupalcode.org/project/drupalorg/-/work_items/3409678")
 
     branch = p["default_branch"]
     protected = {b["name"]: b for b in glab(f"projects/{pid}/protected_branches")}
