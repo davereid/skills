@@ -49,7 +49,7 @@ Follow drupal.org's [README.md template](https://www.drupal.org/docs/develop/man
 - The project name is the only `#` heading.
 - The introduction links to the issue queue, and to the full documentation if there is any. Leave out the template's "For a full description of the module, visit the project page" link: the project page is generated from the README's own content.
 - Required sections are Requirements (every dependency outside core, or say there are none), Installation (link to the standard steps and only note what's different), and Configuration.
-- Optional sections are a table of contents, Recommended modules, Troubleshooting and FAQ, and Maintainers.
+- Optional sections are a table of contents, Recommended modules, Troubleshooting and FAQ, and Maintainers. Leave out supporting organizations, since the project page lists them.
 - Headings use sentence case with two blank lines before them, and lists use `-` and `1.`. Don't wrap lines at 80 columns: it's hard to maintain and makes diffs noisy.
 
 
