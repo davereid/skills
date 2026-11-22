@@ -18,7 +18,7 @@ What `setup-checkout` compares a project against. Each item says what to check a
   _AUTORUN_MAX_PHP: 'push-and-mr'
   ```
   Set `OPT_IN_TEST_PREVIOUS_MAJOR: 1` only when `core_version_requirement` allows the previous major version.
-- **Spell checking has a dictionary.** `_CSPELL_DICTIONARY` names a committed word list (e.g. `.cspell-words.txt`) for project-specific words.
+- **Spell checking has a dictionary.** `_CSPELL_DICTIONARY` names a committed word list (e.g. `.cspell-words.txt`) for project-specific words. If `_CSPELL_WORDS` lists words inline, suggest moving them to the dictionary file.
 - **Next major dependencies are explained.** Each module in `_LENIENT_ALLOW_LIST` (in `composer (next major)`) has a `@todo` comment linking to the issue for its next-major support.
 - **Jobs aren't skipped silently.** Each `SKIP_*` variable set to `1` has a comment saying why.
 
