@@ -346,6 +346,7 @@ In owned repos, also show the **Fixes to backport** table after it (see "Merged 
 - **Out of date**: N commits behind its base, or **conflicts** with it (the host's reference, "Out-of-date branch").
 - **N remaining tasks** in the description: unchecked task list items (`- [ ]`) and items under a heading such as "Remaining tasks" or "TODO".
 - **Waiting for review** from the requested users and teams, or **no reviewer** if there's none and no approval.
+- **Depends on #N**: the description says it needs another PR merged first ("Depends on #N", "Blocked by #N", "Needs #N first", "Builds on #N"), and that PR is still open. A merged one counts as done, so check whether the PR still needs updating from it, such as a rebase task.
 - **Ready to merge**: approved (as the project's rules require, where the host says), and nothing above applies. On drupal.org, where MR approvals are rarely used, an issue at _RTBC_ counts as approved.
 - **Draft**.
 
@@ -363,7 +364,7 @@ Fetch the user's own open issues, and keep those where someone else commented af
 
 Shows what's left before a release can be tagged. Find the release's plan with the host's reference ("Release plan"): `version <version>` finds it by version, `milestone <name>` by milestone title, and if no title matches, by a milestone whose due date is `<name>`. If nothing is found, say what was searched and offer **Create a plan**: list candidates (open PRs targeting the release's branch, and open bug reports and feature requests filed against it), ask which to include (multi-select), and create the milestone or plan issue the reference describes, after showing it.
 
-Include every item in the plan, by anyone, including drafts and the user's own; the profile's `exclude` rules don't apply. For each open PR, read what it's waiting on, as in "Your own PRs" (changes requested, unresolved threads, CI failing, out of date or conflicts, remaining tasks, waiting for review, ready to merge, draft). For an issue, show its status and its open PRs, or "no PR".
+Include every item in the plan, by anyone, including drafts and the user's own; the profile's `exclude` rules don't apply. For each open PR, read what it's waiting on, as in "Your own PRs" (changes requested, unresolved threads, CI failing, out of date or conflicts, remaining tasks, waiting for review, depends on another PR, ready to merge, draft). For an issue, show its status and its open PRs, or "no PR".
 
 Show one table, **Ready to merge** first, then by how much is left: PR or issue, title, author, last updated, size, and what it's waiting on. Above it: "N of M done", counting merged PRs and closed issues. Under it, list:
 
