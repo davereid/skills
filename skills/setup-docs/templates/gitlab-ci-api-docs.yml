@@ -16,6 +16,7 @@ pages:
       exists:
         - mkdocs.yml
       changes: &api-docs-changed-files
+        - .gitlab-ci.yml
         - docs/**/*
         - mkdocs.yml
         - src/**/*

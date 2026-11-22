@@ -1,0 +1,26 @@
+# Builds the docs on the project's own branches other than the default branch,
+# where the pages job doesn't run because publishing would replace the live
+# site, so merge requests show when the docs fail to build. Keeps the site as
+# a job artifact to preview. The artifact browser doesn't serve index.html for
+# directory URLs, as Pages does, so links point at the index.html files
+# (--no-directory-urls). Issue forks use the pages job, which publishes to the
+# fork's own site.
+mkdocs:
+  stage: build
+  image: python:3-slim
+  script:
+    - pip install mkdocs-material
+    - mkdocs build --strict --no-directory-urls --site-dir public
+  artifacts:
+    expose_as: 'Docs preview'
+    paths:
+      - public/
+  rules:
+    - !reference [.skip-pages-rule]
+    - if: $CI_PROJECT_ROOT_NAMESPACE == "project" && $CI_COMMIT_TAG == null && $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+      exists:
+        - mkdocs.yml
+      changes:
+        - .gitlab-ci.yml
+        - docs/**/*
+        - mkdocs.yml
