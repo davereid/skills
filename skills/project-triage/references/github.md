@@ -61,7 +61,7 @@ Where the user has reviewed or authored before: `gh search prs --reviewed-by=@me
 
 ## CODEOWNERS
 
-`.github/CODEOWNERS`, `CODEOWNERS` or `docs/CODEOWNERS`, read at the PR's base: `gh api repos/<repo>/contents/<path>?ref=<baseRefName> -q .content | base64 -d`.
+`.github/CODEOWNERS`, `CODEOWNERS` or `docs/CODEOWNERS`, read at the PR's base: `gh api "repos/<repo>/contents/<path>?ref=<baseRefName>" -q .content | base64 -d` (quote paths with `?`: zsh reads them as globs).
 
 ## A PR the user reviewed
 
@@ -76,7 +76,7 @@ PR's own changes: `gh pr view <n> -R <repo> --json files,commits`. Re-fetch befo
 
 ## A PR the user hasn't reviewed
 
-`gh pr view <n> -R <repo> --json body,files,commits`. File at the PR's head: `gh api repos/<repo>/contents/<path>?ref=<sha>`.
+`gh pr view <n> -R <repo> --json body,files,commits`. File at the PR's head: `gh api "repos/<repo>/contents/<path>?ref=<sha>"`.
 
 ## Check out a PR
 
@@ -112,6 +112,8 @@ Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/
    "comments": [{"path": "src/Foo.php", "line": 51, "side": "RIGHT", "body": "**issue (blocking):** …"}]}
   ```
   `event` is `APPROVE`, `REQUEST_CHANGES` or `COMMENT`. `line` is the line number in the file at `commit_id` (`side: "LEFT"` for a removed line, numbered in the base); add `start_line` for a range. A line outside the diff fails the whole request with a 422: move that point to the body.
+- A posted review's URL: `gh pr review` prints none, so read it with `gh api repos/<repo>/pulls/<n>/reviews -q '.[-1].html_url'`.
+- Edit a posted review's body: `gh api -X PUT repos/<repo>/pulls/<n>/reviews/<review-id> -F body=@<file>`. Edit an issue or PR comment: `gh api -X PATCH repos/<repo>/issues/comments/<comment-id> -F body=@<file>`.
 - Comment on a PR: `gh pr comment <n> -R <repo> --body "<text>"`
 - Dismiss the user's own review: `gh api -X PUT repos/<repo>/pulls/<n>/reviews/<review-id>/dismissals -f message="<reason>"`. Not verified to work on the user's own reviews: if it fails, say so and offer request-changes or a comment.
 - Comment on an issue: `gh issue comment <n> -R <repo> --body "<text>"`
