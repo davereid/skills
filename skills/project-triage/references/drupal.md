@@ -27,6 +27,7 @@ Look for code that does by hand what core provides:
 - Plugins, forms and controllers that override the constructor to inject services, instead of setting them in `create()`; `readonly` properties a subclass's `create()` can't set.
 - Overrides of a parent's method (`defaultConfiguration()`, `buildConfigurationForm()`, `getCacheTags()`) that don't call `parent::`, without a comment saying why.
 - Non-static callbacks stored in a form (`#element_validate`, `#validate`, `#entity_builders`); render callbacks (`#pre_render`, `#lazy_builder`) without `#[TrustedCallback]`.
+- An inline `@var` or an early-return `if` to narrow a type the context guarantees, such as `$form_state->getFormObject()` in an entity form's `hook_form_FORM_ID_alter()`, instead of `assert($x instanceof …)` on its own line: phpstan understands the assert, and a wrong assumption fails in development instead of being silently skipped. An `if` is right for types that can legitimately differ.
 - `$container->has() ? $container->get() : NULL` instead of `ContainerInterface::NULL_ON_INVALID_REFERENCE`.
 - Update hooks that load or save entities, or call services that invoke hooks; `hook_deploy_NAME()` in a contributed module (it only runs through Drush).
 - Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows: read that version's code, not the installed core.
