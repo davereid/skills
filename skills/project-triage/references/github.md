@@ -178,6 +178,10 @@ The `gh` token only needs read access to triage. Write access is needed only for
 
 For the whole repo at once (step 3): `gh run list -R <repo> --status action_required --limit 100 --json databaseId,workflowName,headSha`, keeping runs whose `headSha` is an open PR's `headRefOid`. Runs on a PR's older commits stay `action_required` after a new push, so don't count them.
 
+## Required checks
+
+`gh api repos/<repo>/rules/branches/<baseRefName> -q '[.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context]'` lists the checks the rulesets require on the PR's base. It doesn't include classic branch protection (`gh api repos/<repo>/branches/<baseRefName>/protection/required_status_checks`, which needs admin). A required check missing from `gh pr checks` never ran on the head: a new push starts it, and so does a retitle or description edit when its workflow runs on `pull_request` `edited` (see "Retitle a PR").
+
 ## Reading CI results
 
 Use `gh pr checks <n> -R <repo>`. If it fails with "Resource not accessible by personal access token", the token is fine-grained and has no Checks: read. Fall back to:
