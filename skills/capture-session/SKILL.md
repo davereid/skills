@@ -30,6 +30,7 @@ Read the conversation from the start, including the summary of any earlier part,
 - **Facts** about the project or setup found the hard way (a command that needs a flag, a host quirk, an account's access).
 - **Open work:** tasks started but not finished, untested changes, follow-ups the user agreed to, and questions still open.
 - **Skill improvements:** steps a skill got wrong or missed, or something the user asked for that a skill could do next time.
+- **New skill candidates:** a multi-step workflow the user asked for more than once, in this session or in earlier notes, or that took several hand-run commands, and that no installed skill covers. Name it, say what it would do and why it repeats, and offer to create it.
 
 Drop what only mattered to this session, what's already written down, and what the repository already records (code, commits, docs). To check what's written down, search every file from step 1 for the same rule, not just the target file, including the files they import or point to (such as a conventions file the global instructions name) and shared checklists a skill uses. If another file already has it, propose nothing, or a change to that file if the session refined the rule.
 
