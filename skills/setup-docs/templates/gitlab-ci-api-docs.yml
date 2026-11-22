@@ -30,6 +30,7 @@ pages:
         - mkdocs.yml
       changes: &api-docs-changed-files
         - .gitlab-ci.yml
+        - .gitlab/**/*
         - docs/**/*
         - mkdocs.yml
         - src/**/*
