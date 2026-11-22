@@ -48,6 +48,11 @@ Look for code that does by hand what core provides:
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
 
+## Admin UI text
+
+- Form fields that take a value from an external service (an ID, key, URL or account name) without a `#description` saying where to find it, linking the service's docs, and a `#placeholder` showing the format.
+- Setting descriptions that only say what a setting does. They should start with when to use it, in a site builder's terms, then say what it changes, with an example, and any downside (such as not checking Do Not Track or waiting for consent), linking the service's docs. Flag terms a site builder may not know, such as "multisite" or a setting's machine name.
+
 ## Security
 
 For "Security review", if the `drupal-security-review` skill is installed, check the changed code against the vulnerability classes in its `references/review-methodology.md` ("Deep multi-agent sweep", items 1–6), and grade each finding as its "Complete the sink's source set" section says: trace every caller of a changed sink, such as a shared Twig template with `|raw`, and rate it by the least-privileged role that can supply the value. Use only those checks: the skill's sweep, exploit recordings and report are for full-site audits, not PR reviews.
