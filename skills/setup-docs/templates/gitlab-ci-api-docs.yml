@@ -1,15 +1,28 @@
-# Generates the API docs (docs/api) from the PHP code before the templates'
-# pages job builds the site. Keeps the job's script; overrides the image (PHP
-# and Python), waits for the composer job's vendor directory, and adds the
-# PHP paths to the template's rules, so code changes also republish the docs.
+# Generates the API reference (docs/api) from the PHP code for the pages and
+# mkdocs jobs, on the templates' default PHP image. It runs whenever either of
+# them does.
+api-docs:
+  stage: build
+  needs:
+    - job: composer
+  script:
+    - composer run docs
+  artifacts:
+    paths:
+      - docs/api/
+  rules:
+    - !reference [pages, rules]
+    - !reference [mkdocs, rules]
+
+# Builds the site with the templates' pages job and image, which the job's
+# script needs (it uses bash), after api-docs has generated the API reference.
+# Adds the PHP paths to the template's rules, so code changes also republish
+# the docs.
 # @todo Re-check these rules against include.drupalci.main.yml's pages job
 #   when updating the templates' version.
 pages:
-  image: ghcr.io/elecena/python-php:latest
   needs:
-    - job: composer
-  before_script:
-    - composer run docs
+    - job: api-docs
   rules:
     - !reference [.skip-pages-rule]
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ROOT_NAMESPACE == "project"
