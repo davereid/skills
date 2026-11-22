@@ -88,7 +88,7 @@ Searching needs no login or extra tools: the `curl` commands below read public p
 
 ## Release plan
 
-A release is a milestone: find it and its items with `gitlab.md`'s "Release plan" commands. The API refuses to create milestones (or labels), so give the user `https://git.drupalcode.org/project/<name>/-/milestones/new` with the title and the description to paste, such as the release notes draft. Adding issues and MRs to a milestone works through the API (`PUT` the issue or MR with `milestone_id`, the milestone's `id`, not its `iid`).
+A release is a milestone: find it and its items with `gitlab.md`'s "Release plan" commands. The API refuses to create milestones (or labels), so give the user `https://git.drupalcode.org/project/<name>/-/milestones/new` with the title and the description to paste, such as the release's goal. Adding issues and MRs to a milestone works through the API (`PUT` the issue or MR with `milestone_id`, the milestone's `id`, not its `iid`).
 
 Projects without a milestone for the release may have a plan issue instead, titled `Plan for <Project> <version>` (category Task, version the release's branch), whose description has a `## Remaining tasks` task list with one item per MR or issue: `- [ ] !<iid> #<nid> <title>`, or `- [ ] #<nid> <title>` for an issue with no MR yet. Each listed issue is also linked to the plan as a related item.
 
