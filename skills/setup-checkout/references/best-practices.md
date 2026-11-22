@@ -42,7 +42,7 @@ What `setup-checkout` compares a project against. Each item says what to check a
 ## Docs
 
 - **The README follows drupal.org's template.** If it's missing sections or is out of date, suggest the `update-docs` skill.
-- **Developer documentation has its own place.** If the README has grown developer sections (plugin APIs, hooks, long code examples) and there's no `mkdocs.yml`, suggest the `setup-docs` skill.
+- **Developer documentation has its own place.** If the README has grown developer sections (plugin APIs, hooks, long code examples) and there's no `mkdocs.yml`, suggest the `setup-docs` skill from [drupal-gitlab-api-docs](https://github.com/davereid/drupal-gitlab-api-docs) (`npx skills add davereid/drupal-gitlab-api-docs`).
 - **Docs use the templates' `pages` job.** If `.gitlab-ci.yml` has its own `mkdocs` or `pages` job that only runs `mkdocs build`, suggest `setup-docs`, which removes them.
 - **API modules document their API.** If the project has a PHP API other modules use (services, traits, base classes), ask whether to generate API docs from its docblocks into the docs site, with `setup-docs`'s API docs step.
 
