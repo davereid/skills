@@ -14,10 +14,10 @@ What `setup-checkout` compares a project against. Each item says what to check a
   OPT_IN_TEST_MAX_PHP: 1
   _AUTORUN_PREVIOUS_MINOR: 'all'
   _AUTORUN_NEXT_MINOR: 'all'
-  _AUTORUN_NEXT_MAJOR: 'push-and-mr'
-  _AUTORUN_MAX_PHP: 'push-and-mr'
+  _AUTORUN_NEXT_MAJOR: 'all'
+  _AUTORUN_MAX_PHP: 'all'
   ```
-  Set `OPT_IN_TEST_PREVIOUS_MAJOR: 1` only when `core_version_requirement` allows the previous major version.
+  Set `OPT_IN_TEST_PREVIOUS_MAJOR: 1` and `_AUTORUN_PREVIOUS_MAJOR: 'all'` only when `core_version_requirement` allows the previous major version. Use `'all'`, not `'push-and-mr'`, which leaves the jobs out of the weekly scheduled pipelines (see "Project settings"); without an `_AUTORUN_*` value, a job defaults to `'none'` and waits to be started by hand (2026-11-22: redirect's weekly "next testing" schedule skipped every next and previous core job).
 - **Spell checking has a dictionary.** `_CSPELL_DICTIONARY` names a committed word list (e.g. `.cspell-words.txt`) for project-specific words. If `_CSPELL_WORDS` lists words inline, suggest moving them to the dictionary file.
 - **Next major dependencies are explained.** Each module in `_LENIENT_ALLOW_LIST` (in `composer (next major)`) has a `@todo` comment linking to the issue for its next-major support.
 - **Jobs aren't skipped silently.** Each `SKIP_*` variable set to `1` has a comment saying why.
