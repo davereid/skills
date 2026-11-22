@@ -34,7 +34,7 @@ What `setup-checkout` compares a project against. Each item says what to check a
 ## Tests
 
 - **There are tests.** Kernel tests are the best start for most code; unit tests for code that doesn't need Drupal; functional and FunctionalJavascript tests only for what needs a browser. If there are none, offer to add a kernel test for the project's main feature, and don't write one without asking.
-- **Tests use PHPUnit attributes**, not annotations: `#[Group('<name>')]`, `#[CoversClass]` (or `#[CoversMethod]`), and `#[RunTestsInSeparateProcesses]` on kernel and functional tests. PHPUnit 12 removed annotations.
+- **Tests use PHPUnit attributes**, not annotations: `#[Group('<name>')]`, `#[CoversClass]` (or `#[CoversMethod]`), and `#[RunTestsInSeparateProcesses]` on kernel and functional tests. PHPUnit 12 removed annotations. While `core_version_requirement` allows Drupal 10 (PHPUnit 9, which ignores attributes), keep the annotations alongside the attributes: suggest removing them only once Drupal 10 is dropped, and adding attributes where they're missing (2026-11-22: removing redirect's annotations was suggested, though it still supports `^10.3`).
 - **phpstan is configured.** A committed `phpstan.neon` sets the level, with a `phpstan-baseline.neon` if needed. Suggest fixing baseline entries over time, not adding to them.
 - **The checks pass**: `ddev phpcs`, `ddev phpstan`, `ddev phpunit`, and `ddev eslint` for JavaScript.
 
