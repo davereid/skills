@@ -12,6 +12,8 @@ exclude:
   authors: [renovate[bot], dependabot[bot]]
   labels: [dependencies]
 always_show_requested: true
+# User file only: Markdown lists of things waiting on you elsewhere, kept by another tool.
+inbox: ["~/notes/chat/open.md"]
 ---
 
 # My skill set

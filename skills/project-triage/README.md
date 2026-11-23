@@ -82,6 +82,8 @@ The profile says which PRs are yours in repositories you don't own: paths, label
 1. `~/.config/project-triage/profile.md`: your defaults for every repository.
 2. `<repo root>/.claude/project-triage.md`: overrides for one repository. Its lists replace the same lists from your user file.
 
+Your user profile can also list `inbox` files: Markdown lists of things waiting on you elsewhere, such as chat messages that need a reply, kept up to date by another tool or agent. The skill shows them above the triage tables and flags any that weren't updated today.
+
 PRs that request your review, or that you already reviewed, are always shown, whatever the profile says. Without a profile, the skill asks a few questions and offers to write one, and saves nothing until you agree.
 
 
