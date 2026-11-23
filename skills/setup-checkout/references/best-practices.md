@@ -18,6 +18,8 @@ What `setup-checkout` compares a project against. Each item says what to check a
   _AUTORUN_MAX_PHP: 'all'
   ```
   Set `OPT_IN_TEST_PREVIOUS_MAJOR: 1` and `_AUTORUN_PREVIOUS_MAJOR: 'all'` only when `core_version_requirement` allows the previous major version. Use `'all'`, not `'push-and-mr'`, which leaves the jobs out of the weekly scheduled pipelines (see "Project settings"); without an `_AUTORUN_*` value, a job defaults to `'none'` and waits to be started by hand (2026-11-22: redirect's weekly "next testing" schedule skipped every next and previous core job).
+
+  The merge request that adds these jobs is their first run, so their failures can come from the project rather than the change. Read each failed job, say which failures the change didn't cause (the default branch's pipeline fails the same way, or the error is in code the change didn't touch), and don't write testing instructions that promise the new jobs pass (2026-11-22: guzzle_cache's next minor and next major phpunit jobs failed on deprecations and a dependency's fatal error).
 - **Spell checking has a dictionary.** `_CSPELL_DICTIONARY` names a committed word list (e.g. `.cspell-words.txt`) for project-specific words. If `_CSPELL_WORDS` lists words inline, suggest moving them to the dictionary file.
 - **Next major dependencies are explained.** Each module in `_LENIENT_ALLOW_LIST` (in `composer (next major)`) has a `@todo` comment linking to the issue for its next-major support.
 - **Jobs aren't skipped silently.** Each `SKIP_*` variable set to `1` has a comment saying why.
@@ -34,7 +36,7 @@ What `setup-checkout` compares a project against. Each item says what to check a
 ## Tests
 
 - **There are tests.** Kernel tests are the best start for most code; unit tests for code that doesn't need Drupal; functional and FunctionalJavascript tests only for what needs a browser. If there are none, offer to add a kernel test for the project's main feature, and don't write one without asking.
-- **Tests use PHPUnit attributes**, not annotations: `#[Group('<name>')]`, `#[CoversClass]` (or `#[CoversMethod]`), and `#[RunTestsInSeparateProcesses]` on kernel and functional tests. PHPUnit 12 removed annotations. While `core_version_requirement` allows Drupal 10 (PHPUnit 9, which ignores attributes), keep the annotations alongside the attributes: suggest removing them only once Drupal 10 is dropped, and adding attributes where they're missing (2026-11-22: removing redirect's annotations was suggested, though it still supports `^10.3`).
+- **Tests use PHPUnit attributes**, not annotations: `#[Group('<name>')]`, `#[CoversClass]` (or `#[CoversMethod]`), and `#[RunTestsInSeparateProcesses]` on kernel and functional tests. PHPUnit 12 removed annotations. While `core_version_requirement` allows Drupal 10 (PHPUnit 9, which ignores attributes), keep the annotations alongside the attributes: suggest removing them only once Drupal 10 is dropped, and adding attributes where they're missing (2026-11-22: removing redirect's annotations was suggested, though it still supports `^10.3`). Projects that keep both also need `"#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\.* does not exist#"` in `phpstan.neon`'s `ignoreErrors`, or the `phpstan (previous major)` job fails (2026-11-22: guzzle_cache).
 - **phpstan is configured.** A committed `phpstan.neon` sets the level, with a `phpstan-baseline.neon` if needed. Suggest fixing baseline entries over time, not adding to them.
 - **The checks pass**: `ddev phpcs`, `ddev phpstan`, `ddev phpunit`, and `ddev eslint` for JavaScript.
 
