@@ -11,6 +11,7 @@ Claude Code skills for working with pull requests.
 - [pr-fix](skills/pr-fix/README.md): diagnoses and fixes failing pull requests in DDEV projects, from bots such as Renovate and Dependabot or your own, works through open review feedback, and pushes only after you approve.
 - [project-backlog](skills/project-backlog/README.md): moves a checkout's local backlog notes into remaining tasks on your PRs and merge requests, existing issues or new ones, in projects you maintain, after you approve the plan.
 - [project-triage](skills/project-triage/README.md): lists the open PRs and issues that need your attention, on GitHub, GitLab and drupal.org: everything from others in repositories you own, administer or collaborate on directly, and elsewhere the PRs that match a profile of your skill set and the issues assigned to you. It summarizes what changed since your last review or comment, and offers to approve, comment or hand off to a full review. With `--mine`, it shows what your own PRs are waiting on.
+- [thank-contributors](skills/thank-contributors/SKILL.md): after a merge, drafts a short comment on the issue that thanks the people who worked on it and says where the fix went and when it ships, linking the release milestone. With no argument, it checks every merge since the last release. It posts only the comments you approve.
 
 
 ## Installation
