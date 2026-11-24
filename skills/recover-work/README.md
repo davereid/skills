@@ -7,6 +7,7 @@ For each repository, it:
 - matches it to a current checkout by its root commit, which works across hosts and mirrors;
 - sorts its branches and stashes into already done, probably obsolete, or to decide, checking merged PRs and MRs and whether each change still applies to the default branch;
 - checks its uncommitted and untracked files against the current checkout's history;
+- finds the upstream issues the work depends on (patches, `@todo` links, commit messages, branch names), checks their status, and tracks the open ones;
 - writes one summary for the whole source, with every stash summarized, so a later session can continue;
 - moves the items you choose into branches, issues or draft merge requests, following each project's conventions.
 

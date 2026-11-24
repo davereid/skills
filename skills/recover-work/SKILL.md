@@ -65,6 +65,16 @@ Untracked files and imported branches or stashes are often halves of the same wo
 
 Treat a match as one item to decide, and note what links them (e.g. "stash 9 registers `helper_coalesce_date`; untracked `CoalesceDateFilter.php` defines it"). A match is a guess until the user confirms it in step 6.
 
+### Upstream issues
+
+Recovered work often depends on issues in other projects, and they're easy to lose with the old checkout. Collect every issue the items to decide refer to: patches they add or change (Composer `extra.patches`, a patches file, patch files), `@todo` and other comments with an issue link, commit messages (`Issue #<n>`), and branch names that start with an issue number (`3123456-fix-foo`). For each, check its current status on its tracker and sort it:
+
+- **Fixed:** check whether the release with the fix is installed, or is newer than the project's current version; then the patch or workaround can go instead of being transferred.
+- **Closed without a fix:** say why, and whether the recovered work still needs it.
+- **Open:** keep it with the item, and track it as the user's instructions say (for example, a `project-triage` profile's `watch` list in the upstream project's checkout, with a note naming the project that needs it). If the user doesn't track issues, list it in the summary.
+
+Say which issues were found in which item, and that a recovered patch for an open issue may be out of date: compare it with the issue's latest merge request or patch.
+
 ## 5. Write the summary
 
 Write the findings to one Markdown file for the whole source, outside every checkout, so the notes for all its repositories stay together and can't be committed. Put it in the notes directory the user's instructions name, named after the source (e.g. `<notes>/recover/<source>.md`), or ask where. If an earlier run left notes elsewhere, offer to merge them into this file. Say where the file is at the start and end of each run. List skipped repositories at the top, each with its path and reason (nothing to recover, or the user chose to skip it with what it still holds). Give each other repository a section with:
@@ -74,6 +84,7 @@ Write the findings to one Markdown file for the whole source, outside every chec
 - branches with nothing to transfer, grouped by reason;
 - branches, stashes and files to decide, as checkboxes with a summary each and their status; list a step 4 match as one item, saying what links its parts;
 - every stash in a table (number, date, original branch, status, summary), so none needs reading again;
+- upstream issues (step 4) with their status, the items that use them, and where each is tracked;
 - next steps, and what a new session needs to know to continue: where the refs are, the project's branch and commit conventions, which items the user has decided.
 
 Keep it up to date as work moves, so a later session can pick up from it.
@@ -92,7 +103,7 @@ For each chosen item:
 - Ask before each push, and write PR or MR descriptions following the user's conventions.
 - Don't wait for pipelines after pushing: once work has an issue, PR or MR, failing checks can be triaged in the project later. Move on to the next item.
 
-Mark each transferred item in the summary with its branch, PR, MR or issue.
+Mark each transferred item in the summary with its branch, PR, MR or issue. Track issues filed or commented on in projects the user doesn't maintain, and the upstream issues of transferred items, as in "Upstream issues" (step 4).
 
 A branch left local, with no PR or MR yet, is invisible to later sessions in that project. Add it to the project's notes on current work, where the user's instructions say those go (such as an uncommitted local notes file), with its commit, what it does, what it's waiting on, and a link to the summary file. Ask first if the instructions don't say. Remove the entry once the branch has a PR or MR, or is deleted.
 
