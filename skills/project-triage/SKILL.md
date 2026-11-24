@@ -360,7 +360,7 @@ For every selected PR, also offer **Review and simplify**: check out its branch 
 
 ### Your own issues (`--mine --issues`)
 
-Fetch the user's own open issues (by author, as the host's reference describes, plus any in the profile's `watch` list), and keep those where someone else commented after the user's latest comment (or after the issue was opened, if the user hasn't commented). Count the others as "waiting on others". Show one table, most recently updated first: number, title, last updated, who replied and when. Ask which to handle now, then handle each as in step 9 (for **Comment and close**, e.g. because it's resolved).
+Fetch the user's own open issues (by author, as the host's reference describes, plus any in the profile's `watch` list). List watched issues that are now fixed or closed under the table, and offer **Unwatch** to remove them from the profile file they're in (multi-select, with "none"). Of the open ones, keep those where someone else commented after the user's latest comment (or after the issue was opened, if the user hasn't commented). Count the others as "waiting on others". Show one table, most recently updated first: number, title, last updated, who replied and when. Ask which to handle now, then handle each as in step 9 (for **Comment and close**, e.g. because it's resolved).
 
 ### A release (`version` or `milestone`)
 
