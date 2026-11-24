@@ -12,6 +12,8 @@ exclude:
   authors: [renovate[bot], dependabot[bot]]
   labels: [dependencies]
 always_show_requested: true
+# With --mine --issues: issues you follow but didn't file, shown with your own.
+watch: ["https://www.drupal.org/project/drupal/issues/3453474"]
 # User file only: Markdown lists of things waiting on you elsewhere, kept by another tool.
 inbox: ["~/notes/chat/open.md"]
 ---
