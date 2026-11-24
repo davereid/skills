@@ -100,6 +100,8 @@ Drop issues whose author or labels match the profile's `exclude` (`paths` and `b
 - **B**: the user hasn't commented. Say why it's listed: "your repo", or "assigned to you".
 - **Hidden**: the user's comment is the latest (waiting on others). Count them, and list them only with `--all-prs`.
 
+In owned repos whose issues use labels for their metadata, also list open issues missing any of those labels, whoever filed them, as the host reference's "Missing labels" section describes (only drupal.org's has one; skip this on other hosts). Show them in one table after the triage list, with the labels each would get, and offer to set them all in one batch (multi-select, all selected), as a write the user approves.
+
 ### 5. Show the triage list
 
 Up to four tables, in this order, omitting empty ones: A PRs, B PRs, A issues, B issues. Sort each by most recently updated first, unless the host's reference gives another order.

@@ -104,6 +104,16 @@ Projects without a milestone for the release may have a plan issue instead, titl
 - Tick off an item when its MR merges, or its issue closes: edit the plan's description, keeping everything else. Close the plan after the release is tagged.
 - Remove an item: delete its line, and its link (`-X DELETE "projects/project%2F<name>/issues/<plan nid>/links/<link id>"`).
 
+## Missing labels
+
+In owned projects on GitLab work items, list open work items without a `state::`, `category::`, `priority::` or version label (`v<branch>-dev`), from the open issues already fetched. For each, propose the missing ones:
+
+- State: `state::needsReview` when it has a ready MR, otherwise `state::active` (leave it off on projects without that label).
+- Category from the title and summary (a bug, feature or task), `priority::normal`, and the component label the project uses, if any.
+- Version: the default branch's, and for bugs, also each other supported branch (see "Supported branches") whose code has the same problem (`git show origin/<branch>:<path>`), with a "Backport to <branch>" remaining task added to the summary. If the MR says `Closes`, offer to change it to `Issue:` as in "Closing keywords".
+
+Check each label exists first (`.../labels?per_page=100`). Set them with a quick-action note as in "Work items", and check they changed.
+
 ## Supported branches
 
 `drupalorg project:releases <name>` lists the latest release of each supported branch (e.g. `2.1.0`, `8.x-1.51`, `7.x-1.9` → `2.x`, `8.x-1.x`, `7.x-1.x`).
