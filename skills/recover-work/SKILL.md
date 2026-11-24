@@ -75,6 +75,8 @@ Recovered work often depends on issues in other projects, and they're easy to lo
 
 Say which issues were found in which item, and that a recovered patch for an open issue may be out of date: compare it with the issue's latest merge request or patch.
 
+Work can also wait on an upstream merge request or release rather than an issue (e.g. a change that needs another module's next major release). Record those the same way, and when the work becomes a merge request, add a "Depends on <link>" line and a task to update it once the dependency is merged or released.
+
 ## 5. Write the summary
 
 Write the findings to one Markdown file for the whole source, outside every checkout, so the notes for all its repositories stay together and can't be committed. Put it in the notes directory the user's instructions name, named after the source (e.g. `<notes>/recover/<source>.md`), or ask where. If an earlier run left notes elsewhere, offer to merge them into this file. Say where the file is at the start and end of each run. List skipped repositories at the top, each with its path and reason (nothing to recover, or the user chose to skip it with what it still holds). Give each other repository a section with:
@@ -99,6 +101,8 @@ For each chosen item:
 
 - **Site or client projects:** create a branch in a temporary worktree from the default branch. Apply the change (`git cherry-pick`, `git stash apply refs/recover-stash/<name>/<n>`, or copy files) and split unrelated changes into separate branches. Follow the project's branch naming and commit message conventions (its `AGENTS.md`, contributing docs and commit hooks), and ask for a ticket number when the convention needs one. Fix bugs found while reviewing the old code, and say what changed from the original. Run the project's checks. If its commit hooks can't run in the worktree (e.g. they run through a container that only mounts the main checkout), run the checks by hand and ask before committing without hooks.
 - **Open source projects the user maintains or contributes to:** before drafting each issue, search the project's issues and merge requests, open and closed, for the change's own names (class, method, function, command, setting) and for two or three words from what it does. Old trackers' issues may have been migrated with a bot as the author, so don't limit the search to the user's own. List the matches with each draft, and the searches that found nothing, so the user can check them. When one asks for the same change, add to it instead (comment, push to its fork, update its tasks). Also compare the items filed in this run with each other: two stashes can hold parts of the same change. File an issue for work that has none, push the branch to the issue's fork or a branch, and open a draft merge request. Remaining work goes in the merge request's tasks. Leave old work already on a pushed branch or open merge request alone, but list it.
+- **Client code that could be generic:** before transferring work into a site or client project, check whether it would fit an open source module the user maintains (the same logic, or a fix to a module's behavior). If so, propose the module issue first, without client details, and link it from the client code with a `@todo` so the client code can switch once the module has it.
+- **Keep a durable copy:** never leave a chosen change only in a temporary worktree or directory, which can be cleared between sessions. Commit it to a local branch, or, when it can't be committed yet (e.g. blocked on an upstream release), save it as a patch next to the summary file, and say how to apply it.
 - Files copied from FAT or exFAT drives all look executable: reset modes (e.g. `chmod 644`, and `755` for scripts) before committing.
 - Ask before each push, and write PR or MR descriptions following the user's conventions.
 - Don't wait for pipelines after pushing: once work has an issue, PR or MR, failing checks can be triaged in the project later. Move on to the next item.
@@ -106,6 +110,8 @@ For each chosen item:
 Mark each transferred item in the summary with its branch, PR, MR or issue. Track issues filed or commented on in projects the user doesn't maintain, and the upstream issues of transferred items, as in "Upstream issues" (step 4).
 
 A branch left local, with no PR or MR yet, is invisible to later sessions in that project. Add it to the project's notes on current work, where the user's instructions say those go (such as an uncommitted local notes file), with its commit, what it does, what it's waiting on, and a link to the summary file. Ask first if the instructions don't say. Remove the entry once the branch has a PR or MR, or is deleted.
+
+Items still to decide, or left for later, are only in the summary file, which nobody working in the project will see. Before ending a run, add each to the project's backlog where the user's instructions say (such as an uncommitted backlog file, or an issue or PR task in projects they maintain), with what it is, where its refs or patch are, and a link to the summary file. Ask first if the instructions don't say.
 
 ## 7. Clean up
 
