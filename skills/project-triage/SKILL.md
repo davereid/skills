@@ -23,7 +23,7 @@ Which items are looked at depends on whether the user owns the repo:
 - **Owned** (the user owns or maintains it; each host's reference says exactly what counts): every open PR and issue from others. A maintainer usually wants to see all of them, so the profile's `match` rules and skill set don't narrow this list; only `exclude` rules do.
 - **Not owned:** PRs that request the user's review, that they reviewed, or that match their profile, and issues assigned to them.
 
-With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues"). With `version <version>` or `milestone <name>`, it lists the work planned for one release and what each item is waiting on (see "A release"). With `duplicates`, it looks for open issues that duplicate or overlap each other (see "Duplicates").
+With `--mine`, it lists the user's own open PRs instead, with what each is waiting on (see "Your own PRs"), and with `--mine --issues` their own issues that have replies (see "Your own issues"). With `version <version>` or `milestone <name>`, it lists the work planned for one release and what each item is waiting on (see "A release"). With `duplicates`, it looks for open issues that duplicate or overlap each other (see "Duplicates"). With `patches`, it checks the upstream issue behind each patch the project applies (see "Patches").
 
 ## Rules
 
@@ -62,6 +62,7 @@ With `--mine`, it lists the user's own open PRs instead, with what each is waiti
 - **Owned:** check whether the user owns each repo, with the rule and commands in the host's reference ("Ownership").
 - `--mine`: go to "Your own PRs" (and "Your own issues" with `--issues`), with the same repo scope. It doesn't use the profile.
 - `duplicates`: go to "Duplicates", for the current repo or `owner/repo` (not `--all`). It doesn't use the profile.
+- `patches`: go to "Patches", for the current checkout only (it reads the working copy). It doesn't use the profile.
 - `version <version>` (e.g. `version 2.3.0`) or `milestone <name>` (e.g. `milestone 2026-12-02`): go to "A release", for the current repo or `owner/repo` (not `--all`). It doesn't use the profile.
 - Load the profile (see "Profile"). Find the user's teams; if that fails, say so and use direct review requests only.
 
@@ -391,6 +392,27 @@ Show one table, duplicates first: the two issues (number, title, status, linked 
 - **Skip.**
 
 Show every comment and change first, and get the user's go-ahead for each pair.
+
+### Patches
+
+Patches to dependencies are easy to forget: the upstream fix gets released, the issue is closed without one, or the patch stops matching the issue's latest work. List every patch the project applies: Composer patches (`extra.patches` in `composer.json`, the file `extra.patches-file` names, and `patches.lock.json`), and the patch managers of other ecosystems the project uses (e.g. `patch-package`'s `patches/` directory). For each, find the upstream issue from its description, URL or file name. A Composer patch for a drupal.org package is on drupal.org; read its issue as `references/drupalorg.md` ("Patched issues") says. Find the installed version from the lock file (`composer.lock`, `package-lock.json`).
+
+Sort each patch into:
+
+- **Fixed upstream:** the issue is fixed or its MR merged. Check whether a release has the fix (compare the merge commit with the release tags), and whether the installed version is that release or later. Then it's **removable**, or **removable after updating to <version>**, or **waiting for a release**.
+- **Closed without a fix:** won't fix, duplicate, outdated or works as designed. Read why, and for a duplicate, check the issue it duplicates as above. Say whether the bug still affects this project, if you can tell from the code.
+- **Open:** show its status and last activity. Flag a patch that doesn't match the issue's latest MR or patch (compare the patch with the MR's current diff), and an issue at RTBC or Needs review, where a review or a test from the user could help get it merged.
+- **No issue:** the patch links no upstream issue. Search upstream as in "Check upstream".
+- **Needs attention:** a patch URL that points to a live merge request diff (`.diff` or `.patch` of an open MR), which changes whenever the branch does: suggest saving a copy in the repo. Also list patch files in the repo that no patch definition uses.
+
+Show one table, removable first, then needs attention, closed, open and no issue: package, issue (link, title, status), installed version, and in one line what to do. Then ask which to handle (multi-select, with "none"), and handle each one at a time:
+
+- **Remove the patch:** edit the patch definition (and delete its local file), then reinstall the dependencies (`composer install`) to check the other patches still apply. Show the change first, and leave committing to the user.
+- **Update the patch** to the issue's latest MR diff or patch, saved in the repo when the project keeps patches there, then reinstall the dependencies as above.
+- **Watch:** add the issue to the `watch` list of a profile (see "Profile"), so `--mine --issues` shows it. Prefer the profile in the upstream project's own checkout, if the user has one: ask for its path, since the skill never searches other directories. Otherwise use this repo's `.claude/project-triage.md`. Mark it with a `# patched by <project>` comment, so it can be unwatched once no project patches it.
+- **Review upstream** or **Comment upstream**, as in "Check upstream", e.g. to say the patch works for this project, with the versions.
+- **File upstream** for a patch with no issue, as in "Check upstream".
+- **Skip.**
 
 ## Project issue tracker
 

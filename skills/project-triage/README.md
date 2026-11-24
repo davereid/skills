@@ -27,6 +27,8 @@ With `version 2.3.0` or `milestone 2026-12-02`, it lists the work planned for on
 
 With `duplicates`, it compares every open issue for ones that ask for the same change, or share part of the work. It offers to close a duplicate (keeping the one with a PR, and moving the other's extra ideas over first) or to link overlapping issues as related. Normal issue triage also flags likely duplicates of each issue it shows.
 
+With `patches`, it checks the upstream issue behind each patch the project applies (Composer patches and similar), and sorts them into removable (fixed in the installed version), closed without a fix, open, and patches with no issue. It also flags patches that point to a live merge request diff, and unused patch files. It offers to remove or update a patch, watch its issue (see `watch` in the profile), or review or comment upstream.
+
 Everything it drafts is for you to verify. It never approves, comments, requests changes or closes anything without your answer for that item, after showing the exact text.
 
 
@@ -69,6 +71,7 @@ With the plugin install, use `/pr-skills:project-triage` instead of `/project-tr
 | `/project-triage version 2.3.0` | The work planned for a release, and what each item is waiting on |
 | `/project-triage milestone 2026-12-02` | The same, by milestone title or due date |
 | `/project-triage duplicates` | Open issues that duplicate or overlap each other |
+| `/project-triage patches` | The upstream issues behind the project's patches, and which patches can go |
 
 Without `--mine`, `version` or `milestone`, it skips drafts and your own PRs and issues.
 
