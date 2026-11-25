@@ -1,6 +1,6 @@
 ---
-# Copy to ~/.config/pr-triage/profile.md (all repos) or <repo>/.claude/pr-triage.md (one repo,
-# overrides the user file: lists replace, they don't merge).
+# Copy to ~/.config/project-triage/profile.md (all repos) or <repo>/.claude/project-triage.md
+# (one repo, overrides the user file: lists replace, they don't merge).
 match:
   paths:
     - "src/migrations/**"
@@ -12,6 +12,10 @@ exclude:
   authors: [renovate[bot], dependabot[bot]]
   labels: [dependencies]
 always_show_requested: true
+# With --mine --issues: issues you follow but didn't file, shown with your own.
+watch: ["https://www.drupal.org/project/drupal/issues/3453474"]
+# User file only: Markdown lists of things waiting on you elsewhere, kept by another tool.
+inbox: ["~/notes/chat/open.md"]
 ---
 
 # My skill set
