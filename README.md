@@ -16,11 +16,11 @@ Agent skills for working with pull requests and maintaining drupal.org projects,
 
 ### drupal.org projects
 
-- [setup-checkout](skills/setup-checkout/SKILL.md): clones a project, or updates an existing checkout, and sets it up with DDEV and ddev-drupal-contrib to run the same checks as drupal.org's CI. It then compares the project's CI, Composer, tests and docs with best practices, and offers to bring them up to date.
+- [setup-checkout](skills/setup-checkout/SKILL.md): clones a project, or updates an existing checkout, and sets it up with DDEV and ddev-drupal-contrib to run the same checks as drupal.org's CI. It lists the issues of other projects, such as core, that the code links to, so open ones can be watched and workarounds for closed ones removed. It then compares the project's CI, Composer, tests and docs with best practices, and offers to bring them up to date.
 - [update-docs](skills/update-docs/SKILL.md): keeps a project's `README.md` (to drupal.org's template) and `docs/` in step with its code, lists what they're missing, generates the project page HTML from the README, and writes a short, non-technical summary for the project page.
 - [create-release](skills/create-release/SKILL.md): checks the branch and its pipeline, updates the docs with `update-docs`, tags the release, drafts release notes with `drupalorg maintainer:release-notes`, and links to drupal.org's release and project page forms.
 
-`create-release` needs the [drupalorg CLI](https://github.com/mglaman/drupalorg-cli). `update-docs` needs Python 3. `setup-checkout` needs [DDEV](https://ddev.com/).
+`create-release` needs the [drupalorg CLI](https://github.com/mglaman/drupalorg-cli). `update-docs` needs Python 3. `setup-checkout` needs [DDEV](https://ddev.com/) and Python 3.
 
 To move developer documentation into `docs/` and publish it with MkDocs and GitLab Pages, with generated API docs, use the `setup-docs` skill from [drupal-gitlab-api-docs](https://github.com/davereid/drupal-gitlab-api-docs): `npx skills add davereid/drupal-gitlab-api-docs`.
 
