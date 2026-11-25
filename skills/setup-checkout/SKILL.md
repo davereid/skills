@@ -13,6 +13,8 @@ Use it to clone a new project, or on an existing checkout to bring its setup and
 
 Needs Git with SSH access to `git.drupal.org`, and DDEV. Run it on the host: inside a DDEV container (`IS_DDEV_PROJECT=true`), `ddev` can't run, so stop and give the user the commands instead.
 
+For Drupal core itself (the `drupal` project), follow [Drupal core](#drupal-core) instead of steps 3 to 6.
+
 
 ## Steps
 
@@ -53,3 +55,16 @@ Needs Git with SSH access to `git.drupal.org`, and DDEV. Run it on the host: ins
 11. **Report** the directory, the site's URL, the branch status, the add-ons (`ddev add-on list --installed`), the check results, and the agent instruction, best-practice and project setting changes made or left to do. Include how to run the checks:
    - on the host: `ddev phpunit <path>` (put the path first, so the command adds core's test bootstrap), `ddev phpstan`, `ddev phpcs` and `ddev eslint`;
    - inside the web container: the same scripts, from `/var/www/html`, e.g. `.ddev/commands/web/phpunit tests/src/Kernel`.
+
+
+## Drupal core
+
+Core is Drupal itself, so it doesn't use ddev-drupal-contrib. Set it up with [ddev-drupal-core-dev](https://github.com/justafish/ddev-drupal-core-dev), whose README this follows:
+
+1. Clone `git@git.drupal.org:project/drupal.git`, which checks out `main`, where core MRs go. If another core checkout exists, `git clone --reference-if-able <it> --dissociate` saves downloading its history again.
+2. `ddev config --omit-containers=db --disable-settings-management --php-version=<version>`, with the PHP version core's `composer.json` requires, then remove `name:` as in step 3. Tests use SQLite, so there's no database container.
+3. `ddev start`, `ddev composer install`, then `ddev add-on get justafish/ddev-drupal-core-dev` and any add-ons the user's instructions list, then `ddev restart`.
+4. Create `sites/default/files` (`ddev exec mkdir -p sites/default/files`): the add-on's test database is `sites/default/files/db.sqlite`, and kernel tests fail with "unable to open database file" until the directory exists.
+5. Run one kernel test with `ddev phpunit <path>`, e.g. `ddev phpunit core/tests/Drupal/KernelTests/Core/Entity/EntityReferenceSelection`. The lint commands (`ddev drupal lint:phpcs`, `lint:phpstan`, `lint:js`, `lint:css`, `lint:cspell`, or `ddev drupal lint` for all) check the whole of core, so only run them when asked.
+
+Then continue with steps 7 and 9, and report as in step 11 with the add-on's commands. Skip steps 8 and 10: they're about contrib projects' setup and CI. Don't add Drush, which changes core's Composer dependencies: `ddev drupal install standard` installs a site, and `ddev drupal uninstall` resets it.
