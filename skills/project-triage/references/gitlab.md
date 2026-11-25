@@ -87,26 +87,42 @@ MRs the user reviewed or authored: `merge_requests?scope=all&reviewer_username=$
 
 Your own MRs: `projects/:id/merge_requests?state=opened&author_username=$ME&per_page=100`, with `detailed_merge_status` and the reviewer states.
 
+Your recently merged MRs: `projects/:id/merge_requests?state=merged&author_username=$ME&updated_after=<date 30 days ago>&per_page=100` (GitLab has no `merged_after` filter, so keep those whose `merged_at` is within the window). With `--all`: `merge_requests?scope=all&state=merged&author_username=$ME&updated_after=<date>&per_page=100`. Tick a task off with `glab mr update <iid> -R <repo> --description-file <file>`, after reading the live description.
+
+Recently merged MRs, by anyone: the same request without `author_username`. Recently closed issues: `projects/:id/issues?state=closed&updated_after=<date 30 days ago>&per_page=100`, keeping those whose `closed_at` is within the window. Tick an issue's task off with `glab issue update <iid> -R <repo> --description <text>`, after reading the live description.
+
 ## Out-of-date branch
 
 `projects/:id/merge_requests/<iid>?include_diverged_commits_count=true`: `diverged_commits_count` is how many commits the target branch has that the MR's branch doesn't, and `has_conflicts` is true when it conflicts. `detailed_merge_status` `need_rebase` means the project requires an up-to-date branch.
 
 ## Actions
 
+- `pr-fix` supports GitHub only: don't offer **Fix it** for GitLab or drupal.org merge requests until its `SKILL.md` lists them. Offer to update the branch locally instead (merge the base in, or rebase as the user's force-push instructions allow), asking before the push (2026-11-21: offered for analytics !10, and `pr-fix` stopped).
 - Approve: `glab mr approve <iid> -R <repo>`, then the comment as a note.
 - Withdraw an approval: `glab mr revoke <iid> -R <repo>`.
 - Request changes: post the blocking comment as a note. Setting GitLab's "Requested changes" reviewer state through the API isn't verified: tell the user to submit the review with **Request changes** in the MR's UI if they want that state.
-- Comment on an MR: `glab mr note <iid> -R <repo> -m "<text>"`
+- Comment on an MR: `glab mr note create <iid> -R <repo> --resolvable=false -m "<text>"`. Without `--resolvable=false` it starts a thread that blocks merging when the project requires all threads resolved; `glab mr note <iid> -m` is deprecated (2026-11-18).
 - Inline comment on the diff: take `base_commit_sha`, `start_commit_sha` and `head_commit_sha` from the newest entry in `projects/:id/merge_requests/<iid>/versions`, then write the request as JSON to a temporary file, `{"body": "<text>", "position": {"position_type": "text", "base_sha": "<base>", "start_sha": "<start>", "head_sha": "<head>", "old_path": "<path>", "new_path": "<path>", "new_line": <line>}}` (`old_line` instead for a removed line; build it with `jq -n --arg`), and post it with `glab api --hostname <host> -X POST "projects/:id/merge_requests/<iid>/discussions" --input <file> -H 'Content-Type: application/json'`. Current `glab` refuses `-f "position[...]=…"` fields ("a field name containing a bracket is not supported in a JSON request body", 2026-11-18). Post one per point, then the general points as a note. Not verified: check the note shows on the diff line afterwards, and if it doesn't, post it as a note naming the file and line.
 - Comment on an issue: `glab issue note <iid> -R <repo> -m "<text>"`
 - Close an issue: `glab issue close <iid> -R <repo>` after the comment.
+- Close as duplicate: end the comment with the quick action `/duplicate #<kept>` on its own line, which closes the issue and marks it as a duplicate on both.
+- Link related issues: `glab api --hostname <host> -X POST "projects/:id/issues/<iid>/links" -f target_project_id=<project id> -f target_issue_iid=<other iid> -f link_type=relates_to`.
 - Edit an MR's description: `glab mr update <iid> -R <repo> --description-file <file>`, after all edits to the file have succeeded.
 - Retarget: `glab mr update <iid> -R <repo> --target-branch <branch>`. Before retargeting, compare the number of commits in `projects/:id/repository/compare?from=<branch>&to=<sha>` (its `commits` array) with the MR's own (`projects/:id/merge_requests/<iid>/commits`): when the compare has more, the branch started from another branch.
 - Pending workflow runs: MRs from forks don't start a pipeline in the parent project until a member runs one (the MR's **Pipelines** tab, **Run pipeline**). If the MR has no pipeline for its head (`glab api --hostname <host> "projects/:id/merge_requests/<iid>/pipelines"`), tell the user and give them that link; starting one through the API isn't verified.
 - Retitle a PR: `glab mr update <iid> -R <repo> --title "<title>"`. A title check job in a merge request pipeline doesn't re-run on a title edit: say a new pipeline is needed.
 - Update branch: GitLab has no button that merges the target branch in. Its **Rebase** button (below) is the update, and it rewrites the MR's commits like a force-push.
-- Merge: check `detailed_merge_status` is `mergeable` (in `projects/:id/merge_requests/<iid>`), then `glab mr merge <iid> -R <repo> --yes --sha <sha>` (GitLab refuses if new commits landed), adding `--squash` when the project's `squash_option` is `always` or `default_on` (or the user picks it) and `--squash-message`/`--message` for the commit message. `--auto-merge` is on by default, so a running pipeline makes it merge later, once the pipeline passes: say so, or pass `--auto-merge=false` if the user wants it merged now or not at all. For drupal.org, use `drupalorg.md`'s "Merge" instead.
+- Merge: check `detailed_merge_status` is `mergeable` (in `projects/:id/merge_requests/<iid>`). When the project's `merge_method` is `ff` (fast-forward only), also check `diverged_commits_count` is 0 (`?include_diverged_commits_count=true`): a branch behind its target needs **Rebase** (below) first, even when `detailed_merge_status` says `mergeable`, or the merge fails with `405 Method Not Allowed` (2026-11-18, embed !29). The rebase starts a new pipeline: wait for it before merging. Then `glab mr merge <iid> -R <repo> --yes --sha <sha>` (the full 40-character `sha`: a short one fails with `409 SHA does not match HEAD of source branch`, 2026-11-18, embed !34; GitLab also refuses if new commits landed), adding `--squash` when the project's `squash_option` is `always` or `default_on` (or the user picks it) and `--squash-message`/`--message` for the commit message. `--auto-merge` is on by default, so a running pipeline makes it merge later, once the pipeline passes: say so, or pass `--auto-merge=false` if the user wants it merged now or not at all. For drupal.org, use `drupalorg.md`'s "Merge" instead.
 - Rebase: `glab api --hostname <host> -X PUT "projects/:id/merge_requests/<iid>/rebase"`, then check `merge_requests/<iid>?include_rebase_in_progress=true` until `rebase_in_progress` is false and `merge_error` is null. Needs push access to the source branch; GitLab refuses it when `has_conflicts` is true.
+
+## Release plan
+
+A release is a milestone, in the project or one of its parent groups.
+
+- Find it: `projects/:id/milestones?include_ancestors=true&per_page=100`, matching `title` (the version, or the milestone name), or `due_date` for a date.
+- Items: `projects/:id/merge_requests?milestone=<title>&state=all&per_page=100` and `projects/:id/issues?milestone=<title>&state=all&per_page=100` (URL-encode the title).
+- Create: `glab api --hostname <host> -X POST "projects/:id/milestones" -f title=<version>` (add `-f due_date=<date>` for a date), then set each item's milestone: `-X PUT "projects/:id/merge_requests/<iid>" -F milestone_id=<id>` (or `issues/<iid>`).
+- Remove an item: the same `PUT` with `-F milestone_id=0`.
 
 ## Supported branches
 
@@ -120,6 +136,15 @@ The default branch (`default_branch` in `projects/:id`), plus release branches w
 
 - Private reporting: the project's `SECURITY.md`. Without one, a confidential issue (only project members can see it) is GitLab's usual channel: tell the user to create it with **This issue is confidential** checked, or `glab issue create -R <repo> --confidential`, after showing the text.
 - If the reference for a GitLab-based host gives its own process (as `drupalorg.md` does), use that instead.
+
+### Private security issues
+
+Owned projects only. Security reports are usually confidential issues, which the normal issue fetch already returns to project members, with `confidential: true`. Not every confidential issue is a security report, so use the title, labels (e.g. `security`) and description to tell.
+
+- In step 5, show confidential security issues in a **Private security issues** table first, above the others, and leave them out of the issue tables. Same columns as issues.
+- Coordinated disclosure: never quote them or describe the vulnerability in public issues, MRs or commit messages. Before acting on a public issue or MR that touches the same code, say whether it could disclose the report.
+- Fixes: an MR in the public project is visible to everyone, even when it links a confidential issue. Use GitLab's confidential merge request (from the issue's **Create confidential merge request**, which targets a private fork), or a branch in a private fork. Ask the user which.
+- Comments on confidential issues stay confidential; comment as in "Actions".
 
 ## GitLab token permissions
 

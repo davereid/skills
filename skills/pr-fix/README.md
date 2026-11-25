@@ -20,7 +20,7 @@ The brief for this skill was written during a workshop at the 2026 Lullabot Retr
 ## Requirements
 
 - [Claude Code](https://claude.com/claude-code)
-- [DDEV](https://ddev.com) in the project
+- [DDEV](https://ddev.com) in the project, or the tools its CI workflow uses (e.g. PHP and Composer) installed locally
 - [GitHub CLI](https://cli.github.com) (`gh`), logged in to the project's GitHub host. The skill uses it to read PRs and workflow logs. If you run Claude Code inside DDEV with the [ddev-claude](https://github.com/marcoscano/ddev-claude) add-on, also install the GitHub CLI add-on there: `ddev add-on get plopesc/ddev-gh-cli`
 - For CI: an `ANTHROPIC_API_KEY` secret
 

@@ -61,7 +61,7 @@ Where the user has reviewed or authored before: `gh search prs --reviewed-by=@me
 
 ## CODEOWNERS
 
-`.github/CODEOWNERS`, `CODEOWNERS` or `docs/CODEOWNERS`, read at the PR's base: `gh api repos/<repo>/contents/<path>?ref=<baseRefName> -q .content | base64 -d`.
+`.github/CODEOWNERS`, `CODEOWNERS` or `docs/CODEOWNERS`, read at the PR's base: `gh api "repos/<repo>/contents/<path>?ref=<baseRefName>" -q .content | base64 -d` (quote paths with `?`: zsh reads them as globs).
 
 ## A PR the user reviewed
 
@@ -76,7 +76,7 @@ PR's own changes: `gh pr view <n> -R <repo> --json files,commits`. Re-fetch befo
 
 ## A PR the user hasn't reviewed
 
-`gh pr view <n> -R <repo> --json body,files,commits`. File at the PR's head: `gh api repos/<repo>/contents/<path>?ref=<sha>`.
+`gh pr view <n> -R <repo> --json body,files,commits`. File at the PR's head: `gh api "repos/<repo>/contents/<path>?ref=<sha>"`.
 
 ## Check out a PR
 
@@ -94,6 +94,10 @@ The user's threads are those whose first comment's author is `$ME`. Resolve one:
 
 Your own PRs: `gh pr list -R <repo> --state open --author @me --limit 100 --json number,title,url,body,isDraft,reviewDecision,reviewRequests,reviews,headRefOid,updatedAt`.
 
+Your recently merged PRs: `gh pr list -R <repo> --state merged --author @me --search "merged:>=<date 30 days ago>" --limit 100 --json number,title,url,body,mergedAt`. With `--all`: `gh search prs --author=@me --merged-at=">=<date>" --limit 100 --json url,title,body`. Tick a task off by editing the description (`gh pr edit <n> --body-file <file>`), after reading the live one.
+
+Recently merged PRs, by anyone: the same `gh pr list` without `--author @me`. Recently closed issues: `gh issue list -R <repo> --state closed --search "closed:>=<date 30 days ago> reason:completed" --limit 100 --json number,title,url,body,closedAt`. Tick an issue's task off with `gh issue edit <n> --body-file <file>`.
+
 ## Out-of-date branch
 
 Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/<baseRefName>...<headRefOid> -q .behind_by` (for a fork PR, `<owner>:<headRefName>` in place of the SHA if the SHA isn't found). Conflicts: `gh pr view <n> -R <repo> --json mergeable` is `CONFLICTING`; `UNKNOWN` means GitHub hasn't worked it out yet (often a conflict), so say "may conflict".
@@ -108,16 +112,29 @@ Commits the base has that the PR's branch doesn't: `gh api repos/<repo>/compare/
    "comments": [{"path": "src/Foo.php", "line": 51, "side": "RIGHT", "body": "**issue (blocking):** …"}]}
   ```
   `event` is `APPROVE`, `REQUEST_CHANGES` or `COMMENT`. `line` is the line number in the file at `commit_id` (`side: "LEFT"` for a removed line, numbered in the base); add `start_line` for a range. A line outside the diff fails the whole request with a 422: move that point to the body.
+- A posted review's URL: `gh pr review` prints none, so read it with `gh api repos/<repo>/pulls/<n>/reviews -q '.[-1].html_url'`.
+- Edit a posted review's body: `gh api -X PUT repos/<repo>/pulls/<n>/reviews/<review-id> -F body=@<file>`. Edit an issue or PR comment: `gh api -X PATCH repos/<repo>/issues/comments/<comment-id> -F body=@<file>`.
 - Comment on a PR: `gh pr comment <n> -R <repo> --body "<text>"`
 - Dismiss the user's own review: `gh api -X PUT repos/<repo>/pulls/<n>/reviews/<review-id>/dismissals -f message="<reason>"`. Not verified to work on the user's own reviews: if it fails, say so and offer request-changes or a comment.
 - Comment on an issue: `gh issue comment <n> -R <repo> --body "<text>"`
 - Close an issue: `gh issue close <n> -R <repo> --reason "<completed|not planned>"` after the comment.
+- Close as duplicate: start the comment with `Duplicate of #<kept>`, which GitHub recognizes and shows on both issues, then close it with `--reason "not planned"`.
+- Link related issues: GitHub has no related-issue link: mention the other issue in the comment.
 - Edit a PR's description: `gh pr edit <n> -R <repo> --body-file <file>`, after all edits to the file have succeeded.
 - Retarget: `gh pr edit <n> -R <repo> --base <branch>`. Before retargeting, compare `gh api repos/<repo>/compare/<branch>...<headRefOid> -q .ahead_by` with the PR's commit count (`gh pr view <n> -R <repo> --json commits -q '.commits | length'`): when `ahead_by` is larger, the branch started from another branch.
 - Retitle a PR: `gh pr edit <n> -R <repo> --title "<title>"`. A title check workflow re-runs only if it triggers on `pull_request` `edited`. On PRs from forks, the new run may wait for approval (see "Pending workflow runs"). An edit to the description also triggers `edited` runs, so retitle before editing the description.
 - Update branch (the PR's **Update branch** button): `gh pr update-branch <n> -R <repo>` merges the base into the PR's branch on GitHub, with no force-push. Needs push access to the head branch. The new head can take a few seconds to show in `gh pr view`.
 - Merge: `gh pr merge <n> -R <repo> --squash --match-head-commit <headRefOid>` (or `--merge`, `--rebase`; the SHA makes GitHub refuse if new commits landed), with the methods the repo allows from `gh repo view <repo> --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,deleteBranchOnMerge`. `--subject` and `--body` set the commit message; a squash merge defaults to the PR title. Add `--delete-branch` only when the repo doesn't delete branches itself and the user agrees. If required checks are still running, offer `--auto` instead, which merges once they pass. A merge blocked by a ruleset or branch protection fails: report the reason, and don't retry with `--admin` unless the user asks.
 - Rebase: `gh pr update-branch <n> -R <repo> --rebase`. Needs push access to the head branch (for a fork, "Allow edits from maintainers").
+
+## Release plan
+
+A release is a milestone.
+
+- Find it: `gh api "repos/<repo>/milestones?state=all&per_page=100"`, matching `title` (the version, or the milestone name), or the first 10 characters of `due_on` for a date.
+- Items: `gh pr list -R <repo> --state all --limit 100 --search 'milestone:"<title>"' --json number,title,url,author,state,isDraft,baseRefName,updatedAt`, and `gh issue list -R <repo> --state all --limit 100 --milestone "<title>" --json number,title,url,author,state,labels,updatedAt`.
+- Create: `gh api -X POST "repos/<repo>/milestones" -f title=<version>` (add `-f due_on=<date>T00:00:00Z` for a date), then `gh pr edit <n> -R <repo> --milestone "<title>"` or `gh issue edit` for each item.
+- Remove an item: `gh pr edit <n> -R <repo> --remove-milestone` (or `gh issue edit`).
 
 ## Supported branches
 
@@ -132,6 +149,16 @@ The default branch (`gh repo view <repo> --json defaultBranchRef`), plus release
 - Private reporting: the repo's `SECURITY.md` (root, `.github/` or `docs/`). If the repo has private vulnerability reporting turned on (`gh api repos/<repo>/private-vulnerability-reporting -q .enabled`), it's at `https://github.com/<repo>/security/advisories/new`.
 - Published advisories for a package: `gh api "advisories?ecosystem=<composer|npm|pip|…>&affects=<package>"` (GitHub's advisory database), and the repo's own at `https://github.com/<repo>/security/advisories`.
 
+### Private security issues
+
+Owned repos only, for users who are repo admins or security managers. Private vulnerability reports and unpublished advisories are repository security advisories:
+
+- List: `gh api "repos/<repo>/security-advisories?state=triage"` (new private reports) and `?state=draft` (accepted, not published). Each has `ghsa_id`, `summary`, `severity`, `state`, `updated_at`, `html_url` and `private_fork` (null until one exists). A 403 or 404 means the user or token lacks access: say so rather than "none".
+- In step 5, show a **Private security issues** table first: link, summary, state, severity, last updated, and whether it has a private fork. Triage reports wait on the maintainer to accept or close them.
+- The advisory's comments aren't in the API: link `html_url` for the user to read and reply.
+- Private fork: offer to create one for a triage or draft advisory with `gh api -X POST repos/<repo>/security-advisories/<ghsa_id>/forks`, shown first. Fix branches go there, never to the public repo, until the advisory is published.
+- Coordinated disclosure: keep these advisories, the vulnerability and its fix out of every public draft, PR, issue and commit message. Before acting on a public PR or issue that touches the same code, say whether it could disclose the report.
+
 ## GitHub token permissions
 
 The `gh` token only needs read access to triage. Write access is needed only for the actions above, which always wait for the user's go-ahead.
@@ -141,6 +168,7 @@ The `gh` token only needs read access to triage. Write access is needed only for
   - Pull requests: read, for listing, reviews, comments and files. Pull requests: write for approving, requesting changes, commenting and dismissing.
   - Issues: read, for listing issues and their comments. Issues: write for commenting on and closing issues.
   - Contents: read, for the compare API and `CODEOWNERS`.
+  - Repository security advisories: read, for "Private security issues". Write to create a private fork.
   - Actions: read and Commit statuses: read, for CI results. Fine-grained tokens can't have Checks: read, so `gh pr checks` fails with them; use the fallback in "Reading CI results".
   - `--all` searches only repos the token can read.
 - Team membership (`gh api user/teams`) may be unavailable to a fine-grained token. If it fails, the skill falls back to direct review requests.
@@ -151,6 +179,10 @@ The `gh` token only needs read access to triage. Write access is needed only for
 `gh run list -R <repo> --branch <headRefName> --json databaseId,workflowName,event,conclusion,headSha` and keep runs with `conclusion` `action_required` (for a fork PR, `--branch` is the fork's branch name, so also match `headSha` to the PR's head). Approve one: `gh api -X POST repos/<repo>/actions/runs/<id>/approve`. Runs of the same workflow that a newer run superseded show as `cancelled`; only the newest counts.
 
 For the whole repo at once (step 3): `gh run list -R <repo> --status action_required --limit 100 --json databaseId,workflowName,headSha`, keeping runs whose `headSha` is an open PR's `headRefOid`. Runs on a PR's older commits stay `action_required` after a new push, so don't count them.
+
+## Required checks
+
+`gh api repos/<repo>/rules/branches/<baseRefName> -q '[.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context]'` lists the checks the rulesets require on the PR's base. It doesn't include classic branch protection (`gh api repos/<repo>/branches/<baseRefName>/protection/required_status_checks`, which needs admin). A required check missing from `gh pr checks` never ran on the head: a new push starts it, and so does a retitle or description edit when its workflow runs on `pull_request` `edited` (see "Retitle a PR").
 
 ## Reading CI results
 

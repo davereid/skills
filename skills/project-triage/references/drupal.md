@@ -12,9 +12,15 @@ Look for code that does by hand what core provides:
 
 - **Services:** `arguments` or tags in `*.services.yml` that `_defaults: { autowire: true, autoconfigure: true }` would supply. Find which interfaces core tags automatically in the installed version, rather than from memory: `grep -rn -A1 "registerForAutoconfiguration" web/core --include="*.php"` (core's `CoreServiceProvider` and core modules' service providers). A tag listed there is redundant in `*.services.yml`; any other tag still has to be written out. A `parent` on an autowired service replaces autowiring, so constructor arguments added later aren't passed.
 - **Logging:** an injected logger channel in a service, where `LoggerAwareInterface` and `LoggerAwareTrait` would get `logger.channel.<module>` from core. Hook classes are the exception: core doesn't autoconfigure them, so they inject the channel.
-- **Hooks:** procedural hooks in `.module` files, where the core version the project supports has `#[Hook]` classes.
+- **Hooks:** procedural hooks in `.module` files, where the core version the project supports has `#[Hook]` classes. Modules that also support core before 11.1 keep `#[LegacyHook]` procedural shims that call the hook class, and register the hook classes in `*.services.yml`, since older cores don't; once the minimum core is 11.1, both should go.
+- **Cacheability:** API methods whose result depends on config, entities or other cacheable data, with no way for callers to get its cache tags and contexts. A trailing optional `?CacheableMetadata $cacheability = NULL`, as core's `EntityListBuilder::getOperations()` and `hook_entity_operation()` take, that the method adds to, and passes on to the hooks it invokes, lets callers add it to their render arrays.
+- **Access:** a module's own access machinery, such as methods returning `AccessResult`, a `$cacheability` parameter to carry their cache metadata, or an alter hook so other modules can change the decision. For a decision about an entity, an operation in its access control handler (`checkAccess()`) does all of that: results carry cacheability, are cached per entity and account, and `hook_ENTITY_TYPE_access()` already lets other modules forbid or allow it, so the module's own hooks and alters can go. For a route, an access check service (`AccessInterface`, tagged `access_check`) does.
+- **Optional integrations:** hooks for another module mixed into the main hook class, or settings for it stored in the module's own config, where core's patterns would keep them apart and clean up on uninstall: a hook class for that module (`src/Hook/<Module>Hooks.php`) with `#[HookDependsOnModule('<module>')]` (Drupal 11.5 and later; for older cores, `moduleExists()` checks with a `@todo` to switch), and third-party settings on the module's config entities, added with a form alter and an `#entity_builders` callback, as `MenuUiHooks` does for content types.
+- **Plugin cacheability:** plugins with their own methods for cache tags, contexts or max-age, where implementing `CacheableDependencyInterface` lets callers add the plugin with `addCacheableDependency()`.
+- **Settings forms:** a `ConfigFormBase` that reads defaults and saves values by hand in `buildForm()` and `submitForm()`, where `#config_target` (core 10.2 and later) maps each field to its config key and reports config validation errors on that field.
 - **Config validation:** custom validation for config values, where core's config schema constraints exist (`grep -rn "<constraint>" web/core --include="*.schema.yml"`), e.g. `ExtensionName` and `ExtensionAvailable` for extension names, as in `core.extension`.
 - **Caching:** hand-rolled static caches, where a memory cache bin (`cache.memory`, typed as `CacheBackendInterface`) and `__METHOD__`-based cache IDs would do; caches of data from config entities that may be unsaved, without the entity type's list cache tag.
+- **Utilities:** hand-written escaping, encoding, URL, HTML or array helpers, or PHP functions called with hand-picked flags, where core's utility classes already do it: `Drupal\Component\Utility` (`Html`, `UrlHelper`, `Xss`, `NestedArray`, `Unicode`, `Crypt`), `Drupal\Component\Serialization` (`Json`, `Yaml`) and `Drupal\Core\Utility`. For example, `json_encode()` with `JSON_HEX_*` flags for inline JavaScript is what `Json::encode()` does.
 - **JavaScript:** `DOMContentLoaded`, top-level code or jQuery where `Drupal.behaviors` with `once()` belongs; markup built inline instead of `Drupal.theme` functions; untranslated strings instead of `Drupal.t()`; custom announcements or debouncing instead of `Drupal.announce()` and `Drupal.debounce()`.
 - **CSS:** physical properties (`margin-left`) where logical ones (`margin-inline-start`) support right-to-left languages.
 - **Tests:** a custom test logger instead of Symfony's `BufferingLogger`; external URLs where the test site's own pages would do; recipe tests that don't use `RecipeRunner`; a functional test where a kernel test would do.
@@ -25,15 +31,39 @@ Look for code that does by hand what core provides:
 - Plugins, forms and controllers that override the constructor to inject services, instead of setting them in `create()`; `readonly` properties a subclass's `create()` can't set.
 - Overrides of a parent's method (`defaultConfiguration()`, `buildConfigurationForm()`, `getCacheTags()`) that don't call `parent::`, without a comment saying why.
 - Non-static callbacks stored in a form (`#element_validate`, `#validate`, `#entity_builders`); render callbacks (`#pre_render`, `#lazy_builder`) without `#[TrustedCallback]`.
+- An inline `@var` or an early-return `if` to narrow a type the context guarantees, such as `$form_state->getFormObject()` in an entity form's `hook_form_FORM_ID_alter()`, instead of `assert($x instanceof …)` on its own line: phpstan understands the assert, and a wrong assumption fails in development instead of being silently skipped. An `if` is right for types that can legitimately differ.
+- `\Drupal::service()` or `\Drupal::currentUser()` in classes that can take injected services. Static methods, such as static utility classes and static form callbacks, are the exception.
 - `$container->has() ? $container->get() : NULL` instead of `ContainerInterface::NULL_ON_INVALID_REFERENCE`.
 - Update hooks that load or save entities, or call services that invoke hooks; `hook_deploy_NAME()` in a contributed module (it only runs through Drush).
-- Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows.
+- Deprecated core APIs, or APIs missing from the lowest core version `core_version_requirement` allows: read that version's code, not the installed core.
+- PHP functions or syntax newer than the lowest PHP version the lowest supported core requires.
+- Drush command classes in a Composer package of type `drupal-drush` that aren't in `<namespace>\Drush\Commands` or whose names don't end in `DrushCommands`: Drush 12 doesn't discover them, though Drush 13 does. New commands extending `Drush\Commands\DrushCommands`, which Drush 14 deprecates and Drush 15 removes.
+- APIs removed or deprecated in the next core major, or in the next major of Symfony components the code uses. Say in the review which versions were checked. For example, constraint validators without the `: void` return type on `validate()`, which Symfony 8 (Drupal 12) requires.
+- Changes to the signature or purpose of released public methods (name, parameters, return type, documented exceptions) instead of a new method; adding an optional trailing parameter is fine, and constructors of services, plugins and controllers aren't public API. Check what "released" means for the PR's target branch: a release on that branch's own major version (`git tag --contains <commit that added it>`). A new major branch with no releases yet (e.g. `2.x` with only `8.x-1.*` tags) can change APIs from the earlier major, as long as the release notes list them.
+- New `@deprecated` code or breaking changes without a change record: the `@trigger_error()` message and `@see` should link one (a draft is fine until the release), with the version that will first ship it.
 - Tests that use `expectExceptionMessage()`, which PHPUnit 13 deprecates, instead of `expectExceptionObject()`; its replacement, `expectExceptionMessageIsOrContains()`, doesn't exist before PHPUnit 13.
 - A contrib dependency that's only in `composer.json`, or a version constraint in `.info.yml`: drupal.org builds Composer requirements from `.info.yml`, and CI builds the test site from `composer.json` (`require-dev`).
 - A new setting that changes existing sites' behavior, turned on in code rather than only in `config/install`.
 - Constraint violations reported on the field list rather than the property they're about (`atPath()`).
+- `#cache` or a `#lazy_builder` inside an `#attached['html_head']` item: core renders those items in isolation after the page's cacheability is final, so the cache metadata is lost and the lazy builder is never replaced. Put the cacheability on the render array that carries the attachment.
+- Code for another module's routes, such as a route-name case, that was only tested with a hand-built `RouteMatch`: inbound path processors can rewrite paths before routing, so check which route the real router matches for the URL, with that module installed.
 
 These are conventions most Drupal projects share. Where the project's own code or docs do it differently, the project wins (see "Conventions" in step 8).
+
+## Admin UI text
+
+- Form fields that take a value from an external service (an ID, key, URL or account name) without a `#description` saying where to find it, linking the service's docs, and a `#placeholder` showing the format.
+- Setting descriptions that only say what a setting does. They should start with when to use it, in a site builder's terms, then say what it changes, with an example, and any downside (such as not checking Do Not Track or waiting for consent), linking the service's docs. Flag terms a site builder may not know, such as "multisite" or a setting's machine name.
+
+## Security
+
+For "Security review", if the `drupal-security-review` skill is installed, check the changed code against the vulnerability classes in its `references/review-methodology.md` ("Deep multi-agent sweep", items 1–6), and grade each finding as its "Complete the sink's source set" section says: trace every caller of a changed sink, such as a shared Twig template with `|raw`, and rate it by the least-privileged role that can supply the value. Use only those checks: the skill's sweep, exploit recordings and report are for full-site audits, not PR reviews.
+
+## Dependency updates
+
+When a site's PR updates a package in `composer.lock`, also check:
+
+- The package's constraint in `composer.json` still allows older versions (e.g. `^1.0` after updating to 1.8.0), or the package isn't in `require` at all because it comes in through another package. A later `composer update` can then downgrade it, which breaks the site when the PR also dropped patches the older version needs. Ask for the constraint to be raised to the new version (`^1.8`), adding the package to `require` if needed.
 
 ## Site tooling
 

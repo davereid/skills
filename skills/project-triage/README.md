@@ -23,6 +23,12 @@ For each issue it summarizes the report and the replies since your last comment,
 
 With `--mine`, it lists your own open PRs instead, with what each is waiting on: changes requested, unresolved threads, failing CI, unchecked tasks in the description, or a review. For a PR with work left, it offers to hand off to `/pr-fix` if that skill is installed. It also offers to review and simplify your PR on its branch, applying cleanups (such as Claude Code's `/simplify`) for you to commit. Add `--issues` for your own issues that have new replies.
 
+With `version 2.3.0` or `milestone 2026-12-02`, it lists the work planned for one release, everyone's including drafts, with what each item is waiting on and how many are done. The plan is a milestone on GitHub and GitLab, and a "Plan for <Project> <version>" issue with a task list on drupal.org, which has no milestones. If there's no plan yet, it offers to create one from the open PRs and issues you pick.
+
+With `duplicates`, it compares every open issue for ones that ask for the same change, or share part of the work. It offers to close a duplicate (keeping the one with a PR, and moving the other's extra ideas over first) or to link overlapping issues as related. Normal issue triage also flags likely duplicates of each issue it shows.
+
+With `patches`, it checks the upstream issue behind each patch the project applies (Composer patches and similar), and sorts them into removable (fixed in the installed version), closed without a fix, open, and patches with no issue. It also flags patches that point to a live merge request diff, and unused patch files. It offers to remove or update a patch, watch its issue (see `watch` in the profile), or review or comment upstream.
+
 Everything it drafts is for you to verify. It never approves, comments, requests changes or closes anything without your answer for that item, after showing the exact text.
 
 
@@ -62,8 +68,12 @@ With the plugin install, use `/pr-skills:project-triage` instead of `/project-tr
 | `--approved`, `--changes-requested` | Only PRs you last approved, or requested changes on |
 | `--all-prs` | Also list the PRs that don't match your profile, and the issues waiting on others |
 | `/project-triage --mine` | Your own open PRs and what each is waiting on (add `--all` for every repository, `--issues` for your own issues with new replies) |
+| `/project-triage version 2.3.0` | The work planned for a release, and what each item is waiting on |
+| `/project-triage milestone 2026-12-02` | The same, by milestone title or due date |
+| `/project-triage duplicates` | Open issues that duplicate or overlap each other |
+| `/project-triage patches` | The upstream issues behind the project's patches, and which patches can go |
 
-Without `--mine`, it skips drafts and your own PRs and issues.
+Without `--mine`, `version` or `milestone`, it skips drafts and your own PRs and issues.
 
 `--all` finds repositories you own or were added to directly, but not organization repositories you administer only through a team: triage those one at a time.
 
@@ -74,6 +84,8 @@ The profile says which PRs are yours in repositories you don't own: paths, label
 
 1. `~/.config/project-triage/profile.md`: your defaults for every repository.
 2. `<repo root>/.claude/project-triage.md`: overrides for one repository. Its lists replace the same lists from your user file.
+
+Your user profile can also list `inbox` files: Markdown lists of things waiting on you elsewhere, such as chat messages that need a reply, kept up to date by another tool or agent. The skill shows them above the triage tables and flags any that weren't updated today.
 
 PRs that request your review, or that you already reviewed, are always shown, whatever the profile says. Without a profile, the skill asks a few questions and offers to write one, and saves nothing until you agree.
 
