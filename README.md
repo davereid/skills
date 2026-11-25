@@ -8,6 +8,7 @@ Claude Code skills for working with pull requests.
 
 ## Skills
 
+- [git-shortcuts-cheatsheet](skills/git-shortcuts-cheatsheet/README.md): builds a printable one-page PDF of GitHub and GitLab keyboard shortcuts side by side, for issues, PRs/MRs and code review, after checking both hosts' docs for changes.
 - [pr-fix](skills/pr-fix/README.md): diagnoses and fixes failing pull requests in DDEV projects, from bots such as Renovate and Dependabot or your own, works through open review feedback, and pushes only after you approve.
 - [pr-triage](skills/pr-triage/README.md): lists the open PRs that need your attention, filtered by a profile of your skill set. It summarizes what changed since your last review, and offers to approve, comment or hand off to a full review. With `--mine`, it shows what your own PRs are waiting on.
 - [thank-contributors](skills/thank-contributors/SKILL.md): after a merge, drafts a short comment on the issue that thanks the people who worked on it and says where the fix went and when it ships, linking the release milestone. With no argument, it checks every merge since the last release. It posts only the comments you approve.
